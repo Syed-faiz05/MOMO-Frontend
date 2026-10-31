@@ -1,0 +1,789 @@
+<!DOCTYPE html><html lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Calendar - Saturday, Nov 19th</title>
+<!-- Tailwind CSS CDN with forms and container queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              title: '#3b5998',
+              active: '#4870b7',
+              pill: '#5481c4',
+              pillMuted: '#c5d3ea',
+              textMuted: '#9aa9bf',
+              border: '#f0f3f8',
+              fab: '#3b6ab5'
+            }
+          },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-layout">
+    /* Subtle custom styles for precise rendering */
+    .cal-cell {
+      min-height: 104px;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+    .cal-cell:hover:not(.has-popover) {
+      background-color: #fafbfc;
+    }
+    .text-micro {
+      font-size: 8px;
+      line-height: 10px;
+    }
+    @keyframes pulse-sphere {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.4); }
+      50% { transform: scale(1.08); box-shadow: 0 0 16px 4px rgba(0, 240, 255, 0.25); }
+    }
+    .sphere-listening {
+      animation: pulse-sphere 1.4s ease-in-out infinite;
+    }
+    @keyframes soundwave {
+      0%, 100% { height: 4px; }
+      50% { height: 16px; }
+    }
+    .wave-bar-1 { animation: soundwave 0.8s ease-in-out infinite 0.1s; }
+    .wave-bar-2 { animation: soundwave 0.8s ease-in-out infinite 0.25s; }
+    .wave-bar-3 { animation: soundwave 0.8s ease-in-out infinite 0.4s; }
+    .wave-bar-4 { animation: soundwave 0.8s ease-in-out infinite 0.15s; }
+  </style>
+</head>
+<body class="bg-white text-slate-700 antialiased font-sans select-none min-h-screen flex flex-col justify-start">
+  <!-- BEGIN: MainHeader -->
+  <header class="w-full pt-4 pb-4 px-6 md:px-10 lg:px-14 flex items-center justify-between z-30 relative bg-white/80 backdrop-blur-md border-b border-slate-100">
+    <div class="flex items-center gap-4">
+      <a href="index.html" class="flex items-center gap-2 text-sm font-medium text-neutral-600 hover:text-black py-1.5 px-3.5 rounded-full bg-neutral-100 hover:bg-neutral-200 transition-all duration-200 cursor-pointer" title="Back to Launcher">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"></path>
+        </svg>
+        <span>Back</span>
+      </a>
+
+      <a href="index.html" class="text-2xl md:text-3xl font-semibold text-black tracking-normal select-none cursor-pointer" style="font-family: 'Playfair Display', Georgia, serif;">
+        MOMO - Campus Voice AI Agent
+      </a>
+    </div>
+  </header>
+  <!-- END: MainHeader -->
+
+<!-- BEGIN: MainContainer -->
+<main class="w-full max-w-[850px] mx-auto min-h-screen bg-white flex flex-col relative shadow-sm" data-purpose="calendar-main">
+<!-- BEGIN: HeaderSection -->
+<header class="px-6 pt-6 pb-2 flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 relative z-30" data-purpose="calendar-header">
+<!-- Title showing current selected date -->
+<div class="flex items-center gap-3">
+<h1 class="text-2xl sm:text-3xl font-normal tracking-tight text-[#1F1F1F] transition-all cursor-pointer hover:opacity-80" data-purpose="calendar-heading" id="calendar-heading" title="Click to view today">
+    Saturday, Nov 19th
+  </h1>
+<button class="text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded border border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400 transition-colors" id="today-shortcut-badge" onclick="selectDate('19', 'Saturday, Nov 19th', true)">
+    Today
+  </button>
+</div>
+<!-- Navigation tabs and actions -->
+<nav aria-label="Calendar views" class="flex items-center space-x-6 mt-4 sm:mt-0 text-[11px] font-semibold tracking-wider text-slate-400 relative">
+<!-- View Buttons -->
+<button class="view-btn relative py-1 cursor-pointer hover:text-slate-700 transition-colors uppercase text-[#1F1F1F]" id="view-tab-day" onclick="switchView('day')" type="button">
+<span class="">DAY</span>
+<div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-7 h-[2px] bg-[#1F1F1F] rounded-full transition-all duration-300" id="view-indicator"></div>
+</button>
+<button class="view-btn py-1 hover:text-slate-700 transition-colors uppercase" id="view-tab-week" onclick="switchView('week')" type="button">Week</button>
+<button class="view-btn py-1 hover:text-slate-700 transition-colors uppercase" id="view-tab-month" onclick="switchView('month')" type="button">Month</button>
+<button class="view-btn py-1 hover:text-slate-700 transition-colors uppercase" id="view-tab-year" onclick="switchView('year')" type="button">Year</button>
+<!-- More actions menu button -->
+<div class="relative">
+<button aria-label="More options" class="text-slate-400 hover:text-slate-700 text-lg leading-none tracking-widest pl-1 py-1 focus:outline-none transition-colors" id="more-menu-btn" onclick="toggleMenu()" type="button">
+    ···
+  </button>
+<!-- More Actions Dropdown -->
+<div class="hidden absolute right-0 top-7 w-48 bg-white rounded-lg shadow-xl border border-slate-100 py-1.5 text-xs text-slate-700 z-50" id="more-menu-dropdown">
+<button class="w-full text-left px-3.5 py-2 hover:bg-slate-50 flex items-center gap-2" onclick="selectDate('19', 'Saturday, Nov 19th', true); toggleMenu();">
+<span class="material-symbols-outlined text-[15px] text-slate-500">today</span> Jump to Today
+    </button>
+<button class="w-full text-left px-3.5 py-2 hover:bg-slate-50 flex items-center gap-2" onclick="triggerAiSchedule(); toggleMenu();">
+<span class="material-symbols-outlined text-[15px] text-cyan-600">auto_awesome</span> Smart AI Schedule
+    </button>
+<button class="w-full text-left px-3.5 py-2 hover:bg-slate-50 flex items-center gap-2" onclick="showToast('Calendar exported (.ics)'); toggleMenu();">
+<span class="material-symbols-outlined text-[15px] text-slate-500">file_download</span> Export Calendar
+    </button>
+<button class="w-full text-left px-3.5 py-2 hover:bg-slate-50 flex items-center gap-2" onclick="showToast('Categories filtered: Showing All'); toggleMenu();">
+<span class="material-symbols-outlined text-[15px] text-slate-500">filter_alt</span> Filter Categories
+    </button>
+<div class="border-t border-slate-100 my-1"></div>
+<button class="w-full text-left px-3.5 py-2 hover:bg-slate-50 flex items-center gap-2" onclick="showToast('Settings opened'); toggleMenu();">
+<span class="material-symbols-outlined text-[15px] text-slate-500">settings</span> Settings
+    </button>
+</div>
+</div>
+</nav>
+</header>
+<!-- END: HeaderSection -->
+<!-- View notification banner (when switched from Month) -->
+<div class="hidden bg-slate-50 border-b border-slate-100 px-6 py-1.5 text-[11px] text-slate-500 flex items-center justify-between" id="view-mode-banner">
+<span id="view-mode-text" class="">Currently viewing Day schedule for Nov 19, 2023</span>
+<button class="font-semibold text-slate-700 underline hover:text-black" onclick="switchView('month')">Back to Month Grid</button>
+</div>
+<!-- BEGIN: CalendarGrid -->
+<section class="flex-1 flex flex-col relative" data-purpose="calendar-grid-view">
+<!-- Day Headers Row -->
+<div class="grid grid-cols-7 border-b border-slate-100 text-[13px] font-medium text-slate-600">
+<div class="py-3 px-3">Mon</div>
+<div class="py-3 px-3">Tue</div>
+<div class="py-3 px-3">Wed</div>
+<div class="py-3 px-3">Thu</div>
+<div class="py-3 px-3">Fri</div>
+<div class="py-3 px-3">Sat</div>
+<div class="py-3 px-3">Sun</div>
+</div>
+<!-- Calendar Month Days Body -->
+<div class="grid grid-cols-7 flex-1 border-b border-slate-100 relative" id="calendar-grid-body">
+<!-- ================= ROW 1 ================= -->
+<!-- Mon (30) -->
+<div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="30" onclick="selectDate('30', 'Monday, Oct 30th')">
+<div class="space-y-1"></div>
+<div class="flex justify-end text-xs font-medium text-slate-300">30</div>
+</div>
+<!-- Tue (31) -->
+<div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="31" onclick="selectDate('31', 'Tuesday, Oct 31st')"><div class="space-y-1">
+<div class="bg-[#2D2E32] hover:bg-black text-slate-300 hover:text-white text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors shadow-sm" onclick="event.stopPropagation(); openEventDrawer('Dinner with Strategy Team', '07:30 PM - 09:00 PM', 'Oct 31', 'Social &amp; Dinner', 'Table booked for 4 at Bistro Nova.')">
+              Dinner with Str...
+            </div>
+<div class="bg-[#2D2E32] hover:bg-black text-slate-300 hover:text-white text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors shadow-sm" onclick="event.stopPropagation(); openEventDrawer('Dinner with Str (Follow-up)', '09:00 PM - 10:00 PM', 'Oct 31', 'Social', 'Drinks with partners.')">
+              Dinner with Str...
+            </div>
+</div>
+<div class="flex items-center justify-between text-xs text-slate-400 mt-2">
+<span class="flex items-center gap-1 text-[10px] text-slate-400">
+<svg class="w-3 h-3 fill-slate-400" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"></path></svg>
+              03
+            </span>
+<span class="text-slate-300 font-medium">31</span>
+</div></div>
+<!-- Wed (01) -->
+<div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between bg-white" data-day="01" onclick="selectDate('01', 'Wednesday, Nov 1st')">
+<div class="space-y-1"></div>
+<div class="flex justify-end text-xs font-semibold text-slate-600">01</div>
+</div>
+<!-- Thu (02) -->
+<div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="02" onclick="selectDate('02', 'Thursday, Nov 2nd')"><div class="space-y-1">
+<div class="bg-[#1F1F1F] hover:bg-black text-white text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors shadow-sm" onclick="event.stopPropagation(); openEventDrawer('Dinner with Str...', '07:00 PM - 08:30 PM', 'Nov 02', 'Dinner', 'Strategy planning over dinner.')">
+              Dinner with Str...
+            </div>
+<div class="bg-[#1F1F1F] hover:bg-black text-white text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors shadow-sm" onclick="event.stopPropagation(); openEventDrawer('Meeting with client...', '02:00 PM - 03:00 PM', 'Nov 02', 'Client Work', 'Quarterly roadmap sync via Google Meet.')">
+              Meeting with cli...
+            </div>
+</div>
+<div class="flex items-center justify-between text-xs text-slate-500 mt-2">
+<span class="flex items-center gap-1 text-[10px] text-slate-400">
+<svg class="w-3 h-3 fill-slate-300" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"></path></svg>
+              3
+            </span>
+<span class="font-semibold text-slate-600">02</span>
+</div></div>
+<!-- Fri (03) -->
+<div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="03" onclick="selectDate('03', 'Friday, Nov 3rd')">
+<div class="space-y-1"></div>
+<div class="flex justify-end text-xs font-semibold text-slate-600">03</div>
+</div>
+<!-- Sat (04) -->
+<div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="04" onclick="selectDate('04', 'Saturday, Nov 4th')"><div class="space-y-1">
+<div class="bg-[#1F1F1F] hover:bg-black text-white text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors shadow-sm" onclick="event.stopPropagation(); openEventDrawer('Dinner with Str...', '08:00 PM - 09:30 PM', 'Nov 04', 'Social', 'Weekend catchup.')">
+              Dinner with Str...
+            </div>
+</div>
+<div class="flex items-center justify-between text-xs text-slate-500 mt-2">
+<span class="flex items-center gap-1 text-[10px] text-slate-400">
+<svg class="w-3 h-3 fill-slate-300" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"></path></svg>
+              1
+            </span>
+<span class="font-semibold text-slate-600">04</span>
+</div></div>
+<!-- Sun (05) -->
+<div class="cal-cell cursor-pointer border-b border-slate-100 p-2 flex flex-col justify-between" data-day="05" onclick="selectDate('05', 'Sunday, Nov 5th')">
+<div class="space-y-1"></div>
+<div class="flex justify-end text-xs font-semibold text-slate-600">05</div>
+</div>
+<!-- ================= ROW 2 ================= -->
+<!-- Mon (06) -->
+<div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="06" onclick="selectDate('06', 'Monday, Nov 6th')">
+<div class="space-y-1"></div>
+<div class="flex justify-end text-xs font-semibold text-slate-600">06</div>
+</div>
+<!-- Tue (07) -->
+<div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="07" onclick="selectDate('07', 'Tuesday, Nov 7th')">
+<div class="space-y-1"></div>
+<div class="flex justify-end text-xs font-semibold text-slate-600">07</div>
+</div>
+<!-- Wed (08) - Active Popover Overlay Column -->
+<div class="cal-cell has-popover border-r border-b border-slate-100 relative" data-day="08" id="cell-08" onclick="selectDate('08', 'Wednesday, Nov 8th')">
+<!-- BEGIN: FloatingDetailedCard -->
+<!-- Card popover positioned over the column seamlessly mirroring the screenshot -->
+<div class="absolute -top-24 left-[-1px] right-[-1px] bg-white rounded-md shadow-xl border border-slate-200/80 z-20 flex flex-col justify-between p-2 pb-2.5 h-[236px] transition-all" data-purpose="active-day-card" id="floating-day-popover">
+<!-- Top header row with date & Sphere AI Quick Trigger -->
+<div class="flex items-center justify-between">
+<!-- Embedded AI Assistant Sphere card button -->
+
+<div class="text-xs font-semibold text-slate-600" id="popover-top-date">01</div>
+</div>
+<!-- Interactive Event Chips Container -->
+<div class="space-y-1.5 my-auto" id="popover-events-list">
+<div class="bg-[#1F1F1F] hover:bg-black cursor-pointer text-white text-[9.5px] px-2 py-1 rounded shadow-sm truncate transition-colors flex items-center justify-between" onclick="event.stopPropagation(); openEventDrawer('Dinner with Str...', '06:00 PM - 07:30 PM', 'Nov 08', 'Dinner', 'Evening table reserved with the strategy partners.')">
+<span class="">Dinner with Str...</span>
+<span class="text-[8px] text-slate-400 font-mono">18:00</span>
+</div>
+<div class="bg-[#1F1F1F] hover:bg-black cursor-pointer text-white text-[9.5px] px-2 py-1 rounded shadow-sm truncate transition-colors flex items-center justify-between" onclick="event.stopPropagation(); openEventDrawer('Meeting with cli...', '11:00 AM - 12:00 PM', 'Nov 08', 'Work', 'Weekly checkin on product deliverables.')">
+<span class="">Meeting with cli...</span>
+<span class="text-[8px] text-slate-400 font-mono">11:00</span>
+</div>
+<div class="bg-[#2D2E32] hover:bg-black cursor-pointer text-white text-[9.5px] px-2 py-1 rounded shadow-sm truncate transition-colors flex items-center justify-between" onclick="event.stopPropagation(); openEventDrawer('Work on Brand...', '02:00 PM - 04:00 PM', 'Nov 08', 'Design', 'Refining primary palette, fonts, and style guide.')">
+<span class="">Work on Brand...</span>
+<span class="text-[8px] text-slate-400 font-mono">14:00</span>
+</div>
+</div>
+<!-- Footer row with event count and day label -->
+<div class="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-100">
+<span class="flex items-center gap-1 text-[10px] text-slate-400">
+<svg class="w-3 h-3 fill-slate-300" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"></path></svg>
+<span id="popover-count" class="">4</span>
+</span>
+<span class="font-semibold text-slate-600" id="popover-bottom-date">08</span>
+</div>
+</div>
+<!-- END: FloatingDetailedCard -->
+</div>
+<!-- Thu (09) -->
+<div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="09" onclick="selectDate('09', 'Thursday, Nov 9th')">
+<div class="space-y-1"></div>
+<div class="flex justify-end text-xs font-semibold text-slate-600">09</div>
+</div>
+<!-- Fri (10) -->
+<div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="10" onclick="selectDate('10', 'Friday, Nov 10th')"><div class="space-y-1">
+<div class="bg-[#1F1F1F] hover:bg-black text-white text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors shadow-sm" onclick="event.stopPropagation(); openEventDrawer('Dinner with Str...', '08:00 PM - 09:30 PM', 'Nov 10', 'Dinner', 'Friday team dinner.')">
+              Dinner with Str...
+            </div>
+</div>
+<div class="flex items-center justify-between text-xs text-slate-500 mt-2">
+<span class="flex items-center gap-1 text-[10px] text-slate-400">
+<svg class="w-3 h-3 fill-slate-300" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"></path></svg>
+              1
+            </span>
+<span class="font-semibold text-slate-600">10</span>
+</div></div>
+<!-- Sat (11) -->
+<div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="11" onclick="selectDate('11', 'Saturday, Nov 11th')">
+<div class="space-y-1"></div>
+<div class="flex justify-end text-xs font-semibold text-slate-600">11</div>
+</div>
+<!-- Sun (12) -->
+<div class="cal-cell cursor-pointer border-b border-slate-100 p-2 flex flex-col justify-between" data-day="12" onclick="selectDate('12', 'Sunday, Nov 12th')">
+<div class="space-y-1"></div>
+<div class="flex justify-end text-xs font-semibold text-slate-600">12</div>
+</div>
+<!-- ================= ROW 3 ================= -->
+<!-- Mon (13) -->
+<div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="13" onclick="selectDate('13', 'Monday, Nov 13th')">
+<div class="space-y-1"></div>
+<div class="flex justify-end text-xs font-semibold text-slate-600">13</div>
+</div>
+<!-- Tue (14) -->
+<div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="14" onclick="selectDate('14', 'Tuesday, Nov 14th')"><div class="space-y-1">
+<div class="bg-[#1F1F1F] hover:bg-black text-white text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors shadow-sm" onclick="event.stopPropagation(); openEventDrawer('Dinner with Str...', '07:00 PM', 'Nov 14', 'Social', 'Dinner reservation.')">
+              Dinner with Str...
+            </div>
+<div class="bg-[#1F1F1F] hover:bg-black text-white text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors shadow-sm" onclick="event.stopPropagation(); openEventDrawer('Meeting with cli...', '03:30 PM', 'Nov 14', 'Client', 'Sprint demo review.')">
+              Meeting with cli...
+            </div>
+</div>
+<div class="flex items-center justify-between text-xs text-slate-500 mt-2">
+<span class="flex items-center gap-1 text-[10px] text-slate-400">
+<svg class="w-3 h-3 fill-slate-300" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"></path></svg>
+              2
+            </span>
+<span class="font-semibold text-slate-600">14</span>
+</div></div>
+<!-- Wed (15) -->
+<div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="15" onclick="selectDate('15', 'Wednesday, Nov 15th')">
+<div class="space-y-1"></div>
+<div class="flex justify-end text-xs font-semibold text-slate-600">15</div>
+</div>
+<!-- Thu (16) -->
+<div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="16" onclick="selectDate('16', 'Thursday, Nov 16th')">
+<div class="space-y-1"></div>
+<div class="flex justify-end text-xs font-semibold text-slate-600">16</div>
+</div>
+<!-- Fri (17) -->
+<div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="17" onclick="selectDate('17', 'Friday, Nov 17th')">
+<div class="space-y-1"></div>
+<div class="flex justify-end text-xs font-semibold text-slate-600">17</div>
+</div>
+<!-- Sat (18) -->
+<div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="18" onclick="selectDate('18', 'Saturday, Nov 18th')"><div class="space-y-1">
+<div class="bg-[#1F1F1F] hover:bg-black text-white text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors shadow-sm" onclick="event.stopPropagation(); openEventDrawer('Dinner with Str...', '08:00 PM', 'Nov 18', 'Dinner', 'Dinner reservation.')">
+              Dinner with Str...
+            </div>
+<div class="bg-[#1F1F1F] hover:bg-black text-white text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors shadow-sm" onclick="event.stopPropagation(); openEventDrawer('Meeting with cli...', '01:00 PM', 'Nov 18', 'Meeting', 'Design review sync.')">
+              Meeting with cli...
+            </div>
+</div>
+<div class="flex items-center justify-between text-xs text-slate-500 mt-2">
+<span class="flex items-center gap-1 text-[10px] text-slate-400">
+<svg class="w-3 h-3 fill-slate-300" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"></path></svg>
+              2
+            </span>
+<span class="font-semibold text-slate-600">18</span>
+</div></div>
+<!-- Sun (19) -->
+<div class="cal-cell cursor-pointer border-b border-slate-100 p-2 flex flex-col justify-between ring-1 ring-inset ring-slate-300 bg-slate-50/50" data-day="19" onclick="selectDate('19', 'Saturday, Nov 19th')">
+<div class="space-y-1">
+<div class="w-1.5 h-1.5 rounded-full bg-cyan-500 mb-1" title="Current Day"></div>
+</div>
+<div class="flex justify-end text-xs font-semibold text-slate-900">19</div>
+</div>
+<!-- ================= ROW 4 ================= -->
+<!-- Mon (20) -->
+<div class="cal-cell cursor-pointer border-r border-slate-100 p-2 flex flex-col justify-between" data-day="20" onclick="selectDate('20', 'Monday, Nov 20th')">
+<div class="space-y-1"></div>
+<div class="flex justify-end text-xs font-semibold text-slate-600">20</div>
+</div>
+<!-- Tue (21) -->
+<div class="cal-cell cursor-pointer border-r border-slate-100 p-2 flex flex-col justify-between" data-day="21" onclick="selectDate('21', 'Tuesday, Nov 21st')">
+<div class="space-y-1"></div>
+<div class="flex justify-end text-xs font-semibold text-slate-600">21</div>
+</div>
+<!-- Wed (22) -->
+<div class="cal-cell cursor-pointer border-r border-slate-100 p-2 flex flex-col justify-between" data-day="22" onclick="selectDate('22', 'Wednesday, Nov 22nd')">
+<div class="space-y-1"></div>
+<div class="flex justify-end text-xs font-semibold text-slate-600">22</div>
+</div>
+<!-- Thu (23) -->
+<div class="cal-cell cursor-pointer border-r border-slate-100 p-2 flex flex-col justify-between" data-day="23" onclick="selectDate('23', 'Thursday, Nov 23rd')"><div class="space-y-1">
+<div class="bg-[#1F1F1F] hover:bg-black text-white text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors shadow-sm" onclick="event.stopPropagation(); openEventDrawer('Dinner with Str...', '06:00 PM', 'Nov 23', 'Dinner', 'Thanksgiving eve dinner.')">
+              Dinner with Str...
+            </div>
+<div class="bg-[#1F1F1F] hover:bg-black text-white text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors shadow-sm" onclick="event.stopPropagation(); openEventDrawer('Meeting with cli...', '10:00 AM', 'Nov 23', 'Meeting', 'Project sign-off.')">
+              Meeting with cli...
+            </div>
+<div class="bg-[#2D2E32] hover:bg-black text-white text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors shadow-sm" onclick="event.stopPropagation(); openEventDrawer('Work on Brand...', '03:00 PM', 'Nov 23', 'Design', 'Styleguide and tokens.')">
+              Work on Brand...
+            </div>
+</div>
+<div class="flex items-center justify-between text-xs text-slate-500 mt-2">
+<span class="flex items-center gap-1 text-[10px] text-slate-400">
+<svg class="w-3 h-3 fill-slate-300" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"></path></svg>
+              4
+            </span>
+<span class="font-semibold text-slate-600">23</span>
+</div></div>
+<!-- Fri (24) -->
+<div class="cal-cell cursor-pointer border-r border-slate-100 p-2 flex flex-col justify-between" data-day="24" onclick="selectDate('24', 'Friday, Nov 24th')">
+<div class="space-y-1"></div>
+<div class="flex justify-end text-xs font-semibold text-slate-600">24</div>
+</div>
+<!-- Sat (25) -->
+<div class="cal-cell cursor-pointer border-r border-slate-100 p-2 flex flex-col justify-between" data-day="25" onclick="selectDate('25', 'Saturday, Nov 25th')">
+<div class="space-y-1"></div>
+<div class="flex justify-end text-xs font-semibold text-slate-600">25</div>
+</div>
+<!-- Sun (26) -->
+<div class="cal-cell cursor-pointer p-2 flex flex-col justify-between" data-day="26" onclick="selectDate('26', 'Sunday, Nov 26th')">
+<div class="space-y-1"></div>
+<div class="flex justify-end text-xs font-semibold text-slate-600">26</div>
+</div>
+</div>
+</section>
+<!-- END: CalendarGrid -->
+<!-- BEGIN: FloatingActionButton -->
+<!-- Floating '+' Button on the bottom-right corner -->
+<div class="absolute bottom-4 right-4 z-30" data-purpose="quick-add-action">
+<button aria-label="Add new event" class="w-12 h-12 bg-[#1F1F1F] hover:bg-[#141414] text-white rounded-full flex items-center justify-center shadow-lg shadow-black/30 transition-all hover:scale-105 active:scale-95 focus:outline-none" id="add-event-fab" onclick="openAddEventModal()" type="button">
+<svg class="w-6 h-6 stroke-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+<path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+<!-- END: FloatingActionButton -->
+</main>
+<!-- END: MainContainer -->
+<!-- MODAL: Add New Event -->
+<div class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4" id="add-event-modal">
+<div class="bg-white rounded-xl shadow-2xl border border-slate-100 w-full max-w-md p-6 relative transition-all" onclick="event.stopPropagation()">
+<div class="flex items-center justify-between pb-3 border-b border-slate-100">
+<h3 class="text-lg font-semibold text-slate-900 tracking-tight flex items-center gap-2">
+Add New Event
+      </h3>
+<button class="text-slate-400 hover:text-slate-600 rounded-lg p-1 transition-colors" onclick="closeAddEventModal()">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<form class="mt-4 space-y-4" id="new-event-form" onsubmit="handleCreateEvent(event)">
+<div>
+<label class="block text-xs font-medium text-slate-700 mb-1" for="event-title-input">Event Title</label>
+<input class="w-full text-sm rounded-lg border-slate-200 focus:border-[#1F1F1F] focus:ring-[#1F1F1F] py-2 px-3 placeholder-slate-400" id="event-title-input" placeholder="e.g. Dinner with Design Team" required="" type="text">
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div>
+<label class="block text-xs font-medium text-slate-700 mb-1" for="event-date-input">Date</label>
+<select class="w-full text-sm rounded-lg border-slate-200 focus:border-[#1F1F1F] focus:ring-[#1F1F1F] py-2 px-3" id="event-date-input">
+<option value="08">Nov 08 (Active Card)</option>
+<option selected="" value="19">Nov 19 (Saturday)</option>
+<option value="02">Nov 02</option>
+<option value="14">Nov 14</option>
+<option value="18">Nov 18</option>
+<option value="23">Nov 23</option>
+</select>
+</div>
+<div>
+<label class="block text-xs font-medium text-slate-700 mb-1" for="event-time-input">Time</label>
+<input class="w-full text-sm rounded-lg border-slate-200 focus:border-[#1F1F1F] focus:ring-[#1F1F1F] py-2 px-3" id="event-time-input" type="time" value="19:00">
+</div>
+</div>
+<div>
+<label class="block text-xs font-medium text-slate-700 mb-1" for="event-category-input">Category</label>
+<div class="grid grid-cols-3 gap-2">
+<label class="flex items-center gap-1.5 p-2 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 text-xs font-medium">
+<input checked="" class="text-[#1F1F1F] focus:ring-[#1F1F1F]" name="category" type="radio" value="Strategy">
+<span class="">Strategy</span>
+</label>
+<label class="flex items-center gap-1.5 p-2 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 text-xs font-medium">
+<input class="text-[#1F1F1F] focus:ring-[#1F1F1F]" name="category" type="radio" value="Client">
+<span class="">Client</span>
+</label>
+<label class="flex items-center gap-1.5 p-2 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 text-xs font-medium">
+<input class="text-[#1F1F1F] focus:ring-[#1F1F1F]" name="category" type="radio" value="Brand">
+<span class="">Brand</span>
+</label>
+</div>
+</div>
+<div>
+<label class="block text-xs font-medium text-slate-700 mb-1" for="event-notes-input">Notes (Optional)</label>
+<textarea class="w-full text-sm rounded-lg border-slate-200 focus:border-[#1F1F1F] focus:ring-[#1F1F1F] py-2 px-3 placeholder-slate-400" id="event-notes-input" placeholder="Add location or agenda details..." rows="2"></textarea>
+</div>
+<div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+<button class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors" onclick="closeAddEventModal()" type="button">
+          Cancel
+        </button>
+<button class="px-4 py-2 text-xs font-semibold bg-[#1F1F1F] hover:bg-black text-white rounded-lg shadow-sm transition-all active:scale-95" type="submit">
+          Create Event
+        </button>
+</div>
+</form>
+</div>
+</div>
+<!-- MODAL: Event Detail Drawer / Modal -->
+<div class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden flex items-center justify-center p-4" id="event-detail-modal">
+<div class="bg-white rounded-xl shadow-2xl border border-slate-100 w-full max-w-sm p-5 relative" onclick="event.stopPropagation()">
+<div class="flex items-start justify-between">
+<div>
+<span class="inline-block text-[10px] font-mono uppercase tracking-wider bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full mb-1.5" id="detail-category-badge">Social</span>
+<h4 class="text-base font-semibold text-slate-900 leading-tight" id="detail-title">Dinner with Str...</h4>
+</div>
+<button class="text-slate-400 hover:text-slate-600 rounded-lg p-1" onclick="closeEventDetailModal()">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<div class="my-4 space-y-2.5 text-xs text-slate-600">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-slate-400">schedule</span>
+<span class="font-medium text-slate-800" id="detail-time">07:00 PM - 08:30 PM</span>
+<span class="text-slate-400" id="detail-date">• Nov 08</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-slate-400">group</span>
+<span class="">Sarah K., David M., Alex Chen</span>
+</div>
+<div class="flex items-start gap-2 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+<span class="material-symbols-outlined text-[16px] text-slate-400 mt-0.5">notes</span>
+<p class="text-slate-600" id="detail-notes">Reserved table for team sync and project check-in.</p>
+</div>
+</div>
+<div class="flex items-center justify-between pt-3 border-t border-slate-100 text-xs">
+<button class="text-rose-600 hover:text-rose-700 font-medium flex items-center gap-1 transition-colors" onclick="deleteCurrentEvent()">
+<span class="material-symbols-outlined text-[16px]">delete</span> Delete
+      </button>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded font-medium transition-colors" onclick="showToast('Edit mode enabled for event'); closeEventDetailModal();">
+          Edit
+        </button>
+<button class="px-3 py-1.5 bg-[#1F1F1F] text-white hover:bg-black rounded font-medium transition-colors" onclick="closeEventDetailModal()">
+          Done
+        </button>
+</div>
+</div>
+</div>
+</div>
+<!-- MODAL: AI Sphere Voice / Assistant Modal -->
+<div class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden flex items-center justify-center p-4" id="ai-assistant-modal">
+  <div class="bg-white rounded-2xl shadow-2xl border border-slate-100 w-full max-w-sm p-6 relative flex flex-col items-center text-center" onclick="event.stopPropagation()">
+    <button class="absolute top-3.5 right-3.5 text-slate-400 hover:text-slate-600 rounded-lg p-1 transition-colors cursor-pointer" onclick="closeAiAssistantModal()">
+      <span class="material-symbols-outlined text-[20px]">close</span>
+    </button>
+    <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg shadow-cyan-500/30 mb-3.5 sphere-listening" id="sphere-visual">
+      <span class="material-symbols-outlined text-white text-2xl">auto_awesome</span>
+    </div>
+    <span class="inline-block text-[11px] font-semibold text-cyan-600 bg-cyan-50 px-2.5 py-0.5 rounded-full mb-2" id="ai-status-tag">Listening...</span>
+    <h3 class="text-base font-semibold text-slate-800 tracking-tight mb-1">Momo Calendar Optimizer</h3>
+    <p class="text-xs text-slate-500 leading-relaxed max-w-[260px] mb-4" id="ai-prompt-transcript">
+      “Analyzing your schedule and resolving time conflicts...”
+    </p>
+    <div class="flex items-center gap-2 w-full pt-2 border-t border-slate-100">
+      <button class="flex-1 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition cursor-pointer" onclick="closeAiAssistantModal()" type="button">Dismiss</button>
+      <button class="flex-1 py-2 text-xs font-semibold bg-[#1F1F1F] hover:bg-black text-white rounded-xl shadow-sm transition cursor-pointer" onclick="applyAiOptimization()" type="button">Apply AI Schedule</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- TOAST Notification -->
+<div class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#1F1F1F] text-white px-4 py-2.5 rounded-lg shadow-xl text-xs font-medium flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-3 z-50 border border-slate-700" id="toast">
+<span class="material-symbols-outlined text-[16px] text-cyan-300" id="toast-icon">check_circle</span>
+<span id="toast-message" class="">Event created successfully!</span>
+</div>
+<!-- JAVASCRIPT: Full Interactivity Implementation -->
+<script>
+  // Global State
+  let currentActiveDay = '08';
+  let activeEventElement = null;
+
+  // 1. Toast Notification Helper
+  let toastTimer;
+  function showToast(message, icon = 'check_circle') {
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toast-message');
+    const toastIcon = document.getElementById('toast-icon');
+
+    if (toastTimer) clearTimeout(toastTimer);
+    toastMessage.textContent = message;
+    toastIcon.textContent = icon;
+
+    toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-3');
+    toast.classList.add('opacity-100', 'translate-y-0');
+
+    toastTimer = setTimeout(() => {
+      toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-3');
+      toast.classList.remove('opacity-100', 'translate-y-0');
+    }, 2800);
+  }
+
+  // 2. View Switcher Tabs (DAY, WEEK, MONTH, YEAR)
+  function switchView(viewName) {
+    const tabs = ['day', 'week', 'month', 'year'];
+    const indicator = document.getElementById('view-indicator');
+    const heading = document.getElementById('calendar-heading');
+    const viewBanner = document.getElementById('view-mode-banner');
+    const viewText = document.getElementById('view-mode-text');
+
+    tabs.forEach(tab => {
+      const btn = document.getElementById('view-tab-' + tab);
+      if (tab === viewName) {
+        btn.classList.add('text-[#1F1F1F]');
+        btn.classList.remove('text-slate-400');
+        if (!btn.contains(indicator)) {
+          btn.appendChild(indicator);
+        }
+      } else {
+        btn.classList.remove('text-[#1F1F1F]');
+        btn.classList.add('text-slate-400');
+      }
+    });
+
+    if (viewName === 'day') {
+      heading.textContent = 'Saturday, Nov 19th';
+      viewBanner.classList.remove('hidden');
+      viewText.textContent = 'Active view: Single Day Timeline (Nov 19th)';
+    } else if (viewName === 'week') {
+      heading.textContent = 'Nov 13 – Nov 19, 2023';
+      viewBanner.classList.remove('hidden');
+      viewText.textContent = 'Active view: Week Overview (7 days)';
+    } else if (viewName === 'month') {
+      heading.textContent = 'November 2023';
+      viewBanner.classList.add('hidden');
+    } else if (viewName === 'year') {
+      heading.textContent = 'Year 2023';
+      viewBanner.classList.remove('hidden');
+      viewText.textContent = 'Active view: Annual Horizon 2023';
+    }
+
+    showToast(`Switched to ${viewName.toUpperCase()} view`);
+  }
+
+  // 3. More Action Dropdown Menu
+  function toggleMenu() {
+    const menu = document.getElementById('more-menu-dropdown');
+    menu.classList.toggle('hidden');
+  }
+
+  // Close menus on outside click
+  document.addEventListener('click', (e) => {
+    const menu = document.getElementById('more-menu-dropdown');
+    const menuBtn = document.getElementById('more-menu-btn');
+    if (!menu.contains(e.target) && !menuBtn.contains(e.target)) {
+      menu.classList.add('hidden');
+    }
+  });
+
+  // 4. Day Selection & Popover Movement
+  function selectDate(dayNum, titleString, updateHeading = false) {
+    const popover = document.getElementById('floating-day-popover');
+    const targetCell = document.querySelector(`[data-day="${dayNum}"]`);
+    
+    if (updateHeading) {
+      document.getElementById('calendar-heading').textContent = titleString;
+    }
+
+    if (targetCell && popover) {
+      // Remove popover styling from previous cell
+      document.querySelectorAll('.cal-cell').forEach(c => c.classList.remove('has-popover', 'bg-slate-50/40'));
+      targetCell.classList.add('has-popover');
+
+      // Move popover into target cell
+      targetCell.appendChild(popover);
+      currentActiveDay = dayNum;
+
+      // Update date indicators inside popover
+      document.getElementById('popover-top-date').textContent = dayNum === '08' ? '01' : dayNum;
+      document.getElementById('popover-bottom-date').textContent = dayNum;
+      
+      showToast(`Selected ${titleString}`, 'calendar_month');
+    }
+  }
+
+  // 5. Add Event Modal
+  function openAddEventModal() {
+    const modal = document.getElementById('add-event-modal');
+    modal.classList.remove('hidden');
+    document.getElementById('event-title-input').focus();
+  }
+
+  function closeAddEventModal() {
+    document.getElementById('add-event-modal').classList.add('hidden');
+    document.getElementById('new-event-form').reset();
+  }
+
+  function handleCreateEvent(e) {
+    e.preventDefault();
+    const title = document.getElementById('event-title-input').value.trim();
+    const date = document.getElementById('event-date-input').value;
+    const time = document.getElementById('event-time-input').value;
+    const category = document.querySelector('input[name="category"]:checked')?.value || 'Event';
+    const notes = document.getElementById('event-notes-input').value || 'Created via Quick Add';
+
+    if (!title) return;
+
+    // Create chip and append to popover or relevant cell
+    const popoverList = document.getElementById('popover-events-list');
+    const newChip = document.createElement('div');
+    newChip.className = "bg-[#1F1F1F] hover:bg-black cursor-pointer text-white text-[9.5px] px-2 py-1 rounded shadow-sm truncate transition-colors flex items-center justify-between";
+    newChip.innerHTML = `<span>${title}</span><span class="text-[8px] text-slate-400 font-mono">${time}</span>`;
+    newChip.onclick = (evt) => {
+      evt.stopPropagation();
+      openEventDrawer(title, time, `Nov ${date}`, category, notes);
+    };
+
+    popoverList.prepend(newChip);
+
+    // Update count in popover
+    const countBadge = document.getElementById('popover-count');
+    if (countBadge) {
+      countBadge.textContent = parseInt(countBadge.textContent || '0') + 1;
+    }
+
+    closeAddEventModal();
+    showToast(`Event "${title}" added to calendar!`);
+  }
+
+  // 6. Event Detail Drawer
+  function openEventDrawer(title, time, date, category, notes) {
+    document.getElementById('detail-title').textContent = title;
+    document.getElementById('detail-time').textContent = time || 'Flexible';
+    document.getElementById('detail-date').textContent = `• ${date}`;
+    document.getElementById('detail-category-badge').textContent = category || 'General';
+    document.getElementById('detail-notes').textContent = notes || 'No extra notes provided.';
+
+    activeEventElement = event.currentTarget;
+    document.getElementById('event-detail-modal').classList.remove('hidden');
+  }
+
+  function closeEventDetailModal() {
+    document.getElementById('event-detail-modal').classList.add('hidden');
+    activeEventElement = null;
+  }
+
+  function deleteCurrentEvent() {
+    if (activeEventElement) {
+      activeEventElement.remove();
+      const countBadge = document.getElementById('popover-count');
+      if (countBadge && parseInt(countBadge.textContent) > 0) {
+        countBadge.textContent = parseInt(countBadge.textContent) - 1;
+      }
+    }
+    closeEventDetailModal();
+    showToast('Event removed from schedule', 'delete');
+  }
+
+  // 7. AI Sphere Voice Assistant
+  function triggerAiSchedule() {
+    const modal = document.getElementById('ai-assistant-modal');
+    modal.classList.remove('hidden');
+    
+    // Animate AI recognition
+    const transcript = document.getElementById('ai-prompt-transcript');
+    const statusTag = document.getElementById('ai-status-tag');
+    statusTag.textContent = 'Listening...';
+    transcript.textContent = '“Analyzing your Nov 19 agenda and conflict resolution...”';
+
+    setTimeout(() => {
+      statusTag.textContent = 'Optimized';
+      transcript.textContent = '“Optimizing your Nov 19 schedule... 1 conflict resolved!”';
+    }, 1100);
+  }
+
+  function closeAiAssistantModal() {
+    document.getElementById('ai-assistant-modal').classList.add('hidden');
+  }
+
+  function applyAiOptimization() {
+    closeAiAssistantModal();
+    showToast('AI schedule optimization applied to Nov 19!', 'auto_awesome');
+    selectDate('19', 'Saturday, Nov 19th', true);
+  }
+
+  // Sphere Mouse movement parallax/tracking effect on hover
+  const sphere = document.getElementById('ai-sphere-card');
+  const sphereVisual = document.getElementById('sphere-visual');
+  if (sphere && sphereVisual) {
+    sphere.addEventListener('mousemove', (e) => {
+      const rect = sphere.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      sphereVisual.style.transform = `translate(${x * 4}px, ${y * 4}px) scale(1.15)`;
+    });
+    sphere.addEventListener('mouseleave', () => {
+      sphereVisual.style.transform = 'translate(0px, 0px) scale(1)';
+    });
+  }
+
+  // Global Escape & Backdrop Close Listeners
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeAddEventModal();
+      closeEventDetailModal();
+      closeAiAssistantModal();
+      document.getElementById('more-menu-dropdown').classList.add('hidden');
+    }
+  });
+
+  document.getElementById('add-event-modal').addEventListener('click', closeAddEventModal);
+  document.getElementById('event-detail-modal').addEventListener('click', closeEventDetailModal);
+  document.getElementById('ai-assistant-modal').addEventListener('click', closeAiAssistantModal);
+</script>
+
+
+</body></html>

@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+
+<html lang="en" style=""><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Time Tracker &amp; Task Management Dashboard</title>
+<!-- Tailwind CSS CDN with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<style data-purpose="custom-styles">
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f1f5fa;
+      color: #1e293b;
+    }
+    /* Subtle custom scrollbar */
+    ::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .task-card-dragging {
+      opacity: 0.45;
+      transform: scale(0.98);
+    }
+    .kanban-drop-hover {
+      background-color: #f8fafc;
+      border-color: #6366f1;
+    }
+  </style>
+</head>
+<body class="p-3 md:p-6 min-h-screen flex justify-center items-start">
+<!-- BEGIN: DashboardWrapper -->
+<div class="w-full max-w-[1240px] bg-[#f8fafc]/90 rounded-3xl p-5 md:p-7 shadow-sm border border-slate-100 flex flex-col gap-6">
+<!-- BEGIN: TopHeader -->
+<header class="flex items-center justify-between">
+<h1 class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">Time Tracker</h1>
+<!-- Top Action Icons -->
+<div class="flex items-center gap-2.5">
+<button class="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#1F1F1F] hover:bg-[#141414] text-white rounded-full font-medium text-xs shadow-sm transition" id="btn-add-task" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span>Add Task</span>
+</button>
+<div class="relative">
+<button aria-label="Settings" class="w-9 h-9 rounded-full bg-white border border-slate-200/80 flex items-center justify-center text-slate-500 hover:text-slate-700 shadow-sm transition" id="btn-settings" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><path d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" stroke-linecap="round" stroke-linejoin="round"></path><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+<div class="hidden absolute right-0 top-11 w-44 bg-white rounded-xl shadow-lg border border-slate-100 p-2 z-50 text-xs text-slate-700 flex flex-col gap-1" id="menu-settings">
+<div class="font-semibold px-2 py-1 text-slate-800 border-b border-slate-100">Preferences</div>
+<button class="text-left px-2 py-1.5 rounded-lg hover:bg-slate-50 transition" type="button">Dashboard Settings</button>
+<button class="text-left px-2 py-1.5 rounded-lg hover:bg-slate-50 transition" type="button">Timer Defaults</button>
+</div>
+</div>
+<div class="relative">
+<button aria-label="Help" class="w-9 h-9 rounded-full bg-white border border-slate-200/80 flex items-center justify-center text-slate-500 hover:text-slate-700 shadow-sm transition" id="btn-help" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M12 18h.01" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+<div class="hidden absolute right-0 top-11 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-2.5 z-50 text-xs text-slate-600" id="menu-help">
+<div class="font-bold text-slate-800 mb-1">Quick Guide</div>
+<p class="text-[11px] leading-relaxed">Click "+ Add Task", use column quick '+' buttons, or shift tasks between columns seamlessly.</p>
+</div>
+</div>
+<div class="relative">
+<button aria-label="Notifications" class="w-9 h-9 rounded-full bg-white border border-slate-200/80 flex items-center justify-center text-slate-500 hover:text-slate-700 shadow-sm transition relative" id="btn-notifications" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><path d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span class="absolute top-2 right-2 w-1.5 h-1.5 bg-red-400 rounded-full" id="notif-badge"></span>
+</button>
+<div class="hidden absolute right-0 top-11 w-56 bg-white rounded-xl shadow-lg border border-slate-100 p-2.5 z-50 text-xs text-slate-600" id="menu-notifications">
+<div class="font-bold text-slate-800 mb-1 flex items-center justify-between"><span>Notifications</span><span class="text-[10px] text-slate-400">1 new</span></div>
+<p class="text-[11px] text-slate-500 bg-slate-50 p-2 rounded-lg">Sprint weekly review scheduled for 10:30 today.</p>
+</div>
+</div>
+</div>
+</header>
+<!-- END: TopHeader -->
+<!-- BEGIN: TeamCardsRow -->
+<section aria-label="Team Overview Cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Card 1: Assignments (Purple) -->
+<div class="bg-[#b388ff] text-white rounded-2xl pt-3.5 px-4 pb-2.5 shadow-sm flex flex-col justify-between relative overflow-hidden" data-cat="Assignments">
+<div>
+<div class="flex items-center justify-between mb-2.5">
+<div class="flex items-center gap-1.5">
+<span class="w-6 h-6 rounded-full border-2 border-dashed border-white/60 text-white/80 text-[10px] font-bold flex items-center justify-center">+</span>
+<span class="text-[10px] text-white/80 font-medium">3 members</span>
+</div>
+<span class="cat-hrs text-[10px] font-semibold bg-white/20 px-2 py-0.5 rounded-full">3.5 hrs</span>
+</div>
+<h2 class="font-semibold text-sm tracking-tight text-white mb-0.5">Assignments</h2>
+<p class="cat-sub text-[11px] text-purple-100/90 truncate">1 active task • 1 timer set</p>
+</div>
+<div class="mt-4 pt-1 w-full flex items-center gap-2">
+<div class="h-1 bg-white/25 rounded-full w-full overflow-hidden">
+<div class="cat-progress-bar h-full bg-white rounded-full transition-all duration-300" style="width: 25%"></div>
+</div>
+<span class="cat-progress-text text-[9px] text-white/70 font-medium shrink-0">25%</span>
+</div>
+</div>
+<!-- Card 2: Team Projects (Blue) -->
+<div class="bg-[#6b9dfa] text-white rounded-2xl pt-3.5 px-4 pb-2.5 shadow-sm flex flex-col justify-between relative overflow-hidden" data-cat="Team Projects">
+<div>
+<div class="flex items-center justify-between mb-2.5">
+<div class="flex items-center gap-1.5">
+<span class="w-6 h-6 rounded-full border-2 border-dashed border-white/60 text-white/80 text-[10px] font-bold flex items-center justify-center">+</span>
+<span class="text-[10px] text-white/80 font-medium">5 members</span>
+</div>
+<span class="cat-hrs text-[10px] font-semibold bg-white/20 px-2 py-0.5 rounded-full">4.0 hrs</span>
+</div>
+<h2 class="font-semibold text-sm tracking-tight text-white mb-0.5">Team Projects</h2>
+<p class="cat-sub text-[11px] text-blue-100/90 truncate">1 active task • Running</p>
+</div>
+<div class="mt-4 pt-1 w-full flex items-center gap-2">
+<div class="h-1 bg-white/25 rounded-full w-full overflow-hidden">
+<div class="cat-progress-bar h-full bg-white rounded-full transition-all duration-300" style="width: 50%"></div>
+</div>
+<span class="cat-progress-text text-[9px] text-white/70 font-medium shrink-0">50%</span>
+</div>
+</div>
+<!-- Card 3: Personal Goal (Yellow) -->
+<div class="bg-[#fbc44f] text-white rounded-2xl pt-3.5 px-4 pb-2.5 shadow-sm flex flex-col justify-between relative overflow-hidden" data-cat="Personal Goal">
+<div>
+<div class="flex items-center justify-between mb-2.5">
+<div class="flex items-center gap-1.5">
+<span class="w-6 h-6 rounded-full border-2 border-dashed border-white/60 text-white/80 text-[10px] font-bold flex items-center justify-center">+</span>
+<span class="text-[10px] text-white/80 font-medium">Self</span>
+</div>
+<span class="cat-hrs text-[10px] font-semibold bg-white/20 px-2 py-0.5 rounded-full">1.5 hrs</span>
+</div>
+<h2 class="font-semibold text-sm tracking-tight text-white mb-0.5">Personal Goal</h2>
+<p class="cat-sub text-[11px] text-yellow-100/90 truncate">1 under review</p>
+</div>
+<div class="mt-4 pt-1 w-full flex items-center gap-2">
+<div class="h-1 bg-white/25 rounded-full w-full overflow-hidden">
+<div class="cat-progress-bar h-full bg-white rounded-full transition-all duration-300" style="width: 75%"></div>
+</div>
+<span class="cat-progress-text text-[9px] text-white/70 font-medium shrink-0">75%</span>
+</div>
+</div>
+<!-- Card 4: Courses (Pink) -->
+<div class="bg-[#f97bb3] text-white rounded-2xl pt-3.5 px-4 pb-2.5 shadow-sm flex flex-col justify-between relative overflow-hidden" data-cat="Courses">
+<div>
+<div class="flex items-center justify-between mb-2.5">
+<div class="flex items-center gap-1.5">
+<span class="w-6 h-6 rounded-full border-2 border-dashed border-white/60 text-white/80 text-[10px] font-bold flex items-center justify-center">+</span>
+<span class="text-[10px] text-white/80 font-medium">2 enrolled</span>
+</div>
+<span class="cat-hrs text-[10px] font-semibold bg-white/20 px-2 py-0.5 rounded-full">2.0 hrs</span>
+</div>
+<h2 class="font-semibold text-sm tracking-tight text-white mb-0.5">Courses</h2>
+<p class="cat-sub text-[11px] text-pink-100/90 truncate">1 completed sprint</p>
+</div>
+<div class="mt-4 pt-1 w-full flex items-center gap-2">
+<div class="h-1 bg-white/25 rounded-full w-full overflow-hidden">
+<div class="cat-progress-bar h-full bg-white rounded-full transition-all duration-300" style="width: 100%"></div>
+</div>
+<span class="cat-progress-text text-[9px] text-white/70 font-medium shrink-0">100%</span>
+</div>
+</div>
+</section>
+<!-- END: TeamCardsRow -->
+<!-- BEGIN: KanbanBoardSection -->
+<section aria-label="Workflow Status Columns" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Column 1: Draft -->
+<div class="kanban-col bg-white rounded-2xl p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between min-h-[260px] transition-all" data-stage="Draft">
+<div class="col-main-content">
+<div class="flex items-center justify-between pb-3 relative">
+<div class="flex items-center gap-1.5">
+<span class="font-semibold text-slate-800 text-sm">Draft</span>
+<span class="badge-count text-[10px] text-slate-600 bg-slate-100 font-semibold px-2 py-0.5 rounded-full transition">1</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="btn-quick-add w-6 h-6 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center transition" data-stage="Draft" title="Add task to Draft" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+<div class="relative">
+<button aria-label="Draft options" class="text-slate-400 hover:text-slate-600 options-btn w-6 h-6 rounded-full flex items-center justify-center hover:bg-slate-50 transition" type="button">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 20 20"><circle cx="10" cy="4" r="1.5"></circle><circle cx="10" cy="10" r="1.5"></circle><circle cx="10" cy="16" r="1.5"></circle></svg>
+</button>
+<div class="kanban-dropdown-menu hidden absolute right-0 top-7 w-32 bg-white rounded-xl shadow-lg border border-slate-100 py-1.5 z-40 text-[11px] text-slate-600">
+<button class="menu-action-sort w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-1.5" type="button"><span>⇅</span> Sort A-Z</button>
+<button class="menu-action-clear w-full text-left px-3 py-1.5 hover:bg-red-50 text-red-600 flex items-center gap-1.5" type="button"><span>🗑</span> Clear All</button>
+<button class="menu-action-collapse w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-1.5" type="button"><span>◱</span> Collapse</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Task List Drop Area -->
+<div class="kanban-task-list flex flex-col gap-2 mb-2 min-h-[40px] transition-all"></div>
+<!-- Column Empty / Prompt Placeholder -->
+<button class="btn-open-kanban w-full border-2 border-dashed border-slate-200/80 hover:border-slate-400 rounded-xl p-3 flex flex-col items-center justify-center gap-1 text-center group transition my-1" data-stage="Draft" type="button">
+<span class="w-6 h-6 rounded-full bg-slate-100 group-hover:bg-[#1F1F1F] group-hover:text-white text-slate-500 flex items-center justify-center text-xs font-bold transition">+</span>
+<span class="empty-col-title text-xs font-medium text-slate-600">Add to Draft</span>
+<span class="empty-col-sub text-[10px] text-slate-400">Click to create new draft</span>
+</button>
+</div>
+<div class="col-footer flex items-center justify-between pt-3 mt-2 border-t border-slate-100 text-slate-400 text-xs">
+<span class="footer-stat text-[10px]">1 item saved</span>
+<svg class="w-3.5 h-3.5 fill-slate-300 text-slate-300" viewbox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+</div>
+</div>
+<!-- Column 2: In Progress -->
+<div class="kanban-col bg-white rounded-2xl p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between min-h-[260px] transition-all" data-stage="In Progress">
+<div class="col-main-content">
+<div class="flex items-center justify-between pb-3 relative">
+<div class="flex items-center gap-1.5">
+<span class="font-semibold text-slate-800 text-sm">In Progress</span>
+<span class="badge-count text-[10px] text-slate-600 bg-slate-100 font-semibold px-2 py-0.5 rounded-full transition">1</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="btn-quick-add w-6 h-6 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center transition" data-stage="In Progress" title="Add task to In Progress" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+<div class="relative">
+<button aria-label="In Progress options" class="text-slate-400 hover:text-slate-600 options-btn w-6 h-6 rounded-full flex items-center justify-center hover:bg-slate-50 transition" type="button">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 20 20"><circle cx="10" cy="4" r="1.5"></circle><circle cx="10" cy="10" r="1.5"></circle><circle cx="10" cy="16" r="1.5"></circle></svg>
+</button>
+<div class="kanban-dropdown-menu hidden absolute right-0 top-7 w-32 bg-white rounded-xl shadow-lg border border-slate-100 py-1.5 z-40 text-[11px] text-slate-600">
+<button class="menu-action-sort w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-1.5" type="button"><span>⇅</span> Sort A-Z</button>
+<button class="menu-action-clear w-full text-left px-3 py-1.5 hover:bg-red-50 text-red-600 flex items-center gap-1.5" type="button"><span>🗑</span> Clear All</button>
+<button class="menu-action-collapse w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-1.5" type="button"><span>◱</span> Collapse</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Task List Drop Area -->
+<div class="kanban-task-list flex flex-col gap-2 mb-2 min-h-[40px] transition-all"></div>
+<button class="btn-open-kanban w-full border-2 border-dashed border-slate-200/80 hover:border-slate-400 rounded-xl p-3 flex flex-col items-center justify-center gap-1 text-center group transition my-1" data-stage="In Progress" type="button">
+<span class="w-6 h-6 rounded-full bg-slate-100 group-hover:bg-[#1F1F1F] group-hover:text-white text-slate-500 flex items-center justify-center text-xs font-bold transition">+</span>
+<span class="empty-col-title text-xs font-medium text-slate-600">Add to In Progress</span>
+<span class="empty-col-sub text-[10px] text-slate-400">Drag here or start timer</span>
+</button>
+</div>
+<div class="col-footer flex items-center justify-between pt-3 mt-2 border-t border-slate-100 text-slate-400 text-xs">
+<span class="footer-stat text-[10px]">1 active timer</span>
+<svg class="w-3.5 h-3.5 fill-slate-300 text-slate-300" viewbox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+</div>
+</div>
+<!-- Column 3: Editing -->
+<div class="kanban-col bg-white rounded-2xl p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between min-h-[260px] transition-all" data-stage="Editing">
+<div class="col-main-content">
+<div class="flex items-center justify-between pb-3 relative">
+<div class="flex items-center gap-1.5">
+<span class="font-semibold text-slate-800 text-sm">Editing</span>
+<span class="badge-count text-[10px] text-slate-600 bg-slate-100 font-semibold px-2 py-0.5 rounded-full transition">1</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="btn-quick-add w-6 h-6 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center transition" data-stage="Editing" title="Add task to Editing" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+<div class="relative">
+<button aria-label="Editing options" class="text-slate-400 hover:text-slate-600 options-btn w-6 h-6 rounded-full flex items-center justify-center hover:bg-slate-50 transition" type="button">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 20 20"><circle cx="10" cy="4" r="1.5"></circle><circle cx="10" cy="10" r="1.5"></circle><circle cx="10" cy="16" r="1.5"></circle></svg>
+</button>
+<div class="kanban-dropdown-menu hidden absolute right-0 top-7 w-32 bg-white rounded-xl shadow-lg border border-slate-100 py-1.5 z-40 text-[11px] text-slate-600">
+<button class="menu-action-sort w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-1.5" type="button"><span>⇅</span> Sort A-Z</button>
+<button class="menu-action-clear w-full text-left px-3 py-1.5 hover:bg-red-50 text-red-600 flex items-center gap-1.5" type="button"><span>🗑</span> Clear All</button>
+<button class="menu-action-collapse w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-1.5" type="button"><span>◱</span> Collapse</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Task List Drop Area -->
+<div class="kanban-task-list flex flex-col gap-2 mb-2 min-h-[40px] transition-all"></div>
+<button class="btn-open-kanban w-full border-2 border-dashed border-slate-200/80 hover:border-slate-400 rounded-xl p-3 flex flex-col items-center justify-center gap-1 text-center group transition my-1" data-stage="Editing" type="button">
+<span class="w-6 h-6 rounded-full bg-slate-100 group-hover:bg-[#1F1F1F] group-hover:text-white text-slate-500 flex items-center justify-center text-xs font-bold transition">+</span>
+<span class="empty-col-title text-xs font-medium text-slate-600">Add to Editing</span>
+<span class="empty-col-sub text-[10px] text-slate-400">Awaiting review</span>
+</button>
+</div>
+<div class="col-footer flex items-center justify-between pt-3 mt-2 border-t border-slate-100 text-slate-400 text-xs">
+<span class="footer-stat text-[10px]">1 under review</span>
+<svg class="w-3.5 h-3.5 fill-slate-300 text-slate-300" viewbox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+</div>
+</div>
+<!-- Column 4: Done -->
+<div class="kanban-col bg-white rounded-2xl p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between min-h-[260px] transition-all" data-stage="Done">
+<div class="col-main-content">
+<div class="flex items-center justify-between pb-3 relative">
+<div class="flex items-center gap-1.5">
+<span class="font-semibold text-slate-800 text-sm">Done</span>
+<span class="badge-count text-[10px] text-slate-600 bg-slate-100 font-semibold px-2 py-0.5 rounded-full transition">1</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="btn-quick-add w-6 h-6 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center transition" data-stage="Done" title="Add task to Done" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+<div class="relative">
+<button aria-label="Done options" class="text-slate-400 hover:text-slate-600 options-btn w-6 h-6 rounded-full flex items-center justify-center hover:bg-slate-50 transition" type="button">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 20 20"><circle cx="10" cy="4" r="1.5"></circle><circle cx="10" cy="10" r="1.5"></circle><circle cx="10" cy="16" r="1.5"></circle></svg>
+</button>
+<div class="kanban-dropdown-menu hidden absolute right-0 top-7 w-32 bg-white rounded-xl shadow-lg border border-slate-100 py-1.5 z-40 text-[11px] text-slate-600">
+<button class="menu-action-sort w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-1.5" type="button"><span>⇅</span> Sort A-Z</button>
+<button class="menu-action-clear w-full text-left px-3 py-1.5 hover:bg-red-50 text-red-600 flex items-center gap-1.5" type="button"><span>🗑</span> Clear All</button>
+<button class="menu-action-collapse w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-1.5" type="button"><span>◱</span> Collapse</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Task List Drop Area -->
+<div class="kanban-task-list flex flex-col gap-2 mb-2 min-h-[40px] transition-all"></div>
+<button class="btn-open-kanban w-full border-2 border-dashed border-slate-200/80 hover:border-slate-400 rounded-xl p-3 flex flex-col items-center justify-center gap-1 text-center group transition my-1" data-stage="Done" type="button">
+<span class="w-6 h-6 rounded-full bg-slate-100 group-hover:bg-[#1F1F1F] group-hover:text-white text-slate-400 flex items-center justify-center text-xs font-bold transition">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M4.5 12.75l6 6 9-13.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</span>
+<span class="empty-col-title text-xs font-medium text-slate-600">Add Completed</span>
+<span class="empty-col-sub text-[10px] text-slate-400">Archive completed items</span>
+</button>
+</div>
+<div class="col-footer flex items-center justify-between pt-3 mt-2 border-t border-slate-100 text-slate-400 text-xs">
+<span class="footer-stat text-[10px]">100% sprint progress</span>
+<span class="w-3.5 h-3.5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[8px] font-bold">✓</span>
+</div>
+</div>
+</section>
+<!-- END: KanbanBoardSection -->
+<!-- BEGIN: TaskManagementScheduleSection -->
+<section aria-label="Task Management Weekly Schedule" class="mt-2">
+<!-- Section Header & View Toggles -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+<h2 class="text-lg md:text-xl font-bold text-slate-800 tracking-tight">Task Management</h2>
+<div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-full self-start sm:self-auto"><button class="view-toggle-btn px-4 py-1 text-xs font-medium text-slate-600 hover:text-slate-900 rounded-full transition" data-view="Month" type="button">Month</button><button class="view-toggle-btn px-4 py-1 text-xs font-medium text-slate-600 hover:text-slate-900 rounded-full transition" data-view="Day" type="button">Day</button><button class="view-toggle-btn px-5 py-1 text-xs font-medium text-white bg-[#1F1F1F] rounded-full shadow-sm" data-view="Week" type="button">Week</button><button aria-label="Options" class="px-2.5 py-1 text-xs font-medium text-slate-400 hover:text-slate-700 rounded-full" id="btn-view-more" type="button">•••</button></div>
+</div>
+<!-- Schedule Table / Calendar Grid Container -->
+<div class="bg-white rounded-3xl p-4 md:p-6 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.03)] border border-slate-100 overflow-x-auto">
+<div class="min-w-[920px] relative">
+<!-- Column Headers -->
+<div class="grid grid-cols-[60px_repeat(7,1fr)] gap-2 border-b border-slate-100 pb-3 items-center text-center">
+<div></div> <!-- Spacer for time axis -->
+<div class="flex flex-col">
+<span class="text-[11px] font-semibold text-slate-600">Monday</span>
+<span class="text-[10px] text-slate-400">09.08.2025</span>
+</div>
+<!-- Highlighted Active Tuesday Column Header -->
+<div class="flex flex-col py-1 px-2 rounded-xl bg-slate-100/90 shadow-sm border border-slate-200/50">
+<span class="text-[11px] font-bold text-slate-800">Tuesday</span>
+<span class="text-[10px] font-medium text-slate-500">10.08.2025</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[11px] font-semibold text-slate-600">Wednesday</span>
+<span class="text-[10px] text-slate-400">11.08.2025</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[11px] font-semibold text-slate-600">Thursday</span>
+<span class="text-[10px] text-slate-400">12.08.2025</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[11px] font-semibold text-slate-600">Friday</span>
+<span class="text-[10px] text-slate-400">13.08.2025</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[11px] font-semibold text-slate-600">Saturday</span>
+<span class="text-[10px] text-slate-400">14.08.2025</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[11px] font-semibold text-slate-600">Sunday</span>
+<span class="text-[10px] text-slate-400">15.08.2025</span>
+</div>
+</div>
+<!-- Schedule Grid Area with Time Rows -->
+<div class="relative grid grid-cols-[60px_repeat(7,1fr)] gap-2 pt-2"><!-- Tuesday Vertical Column Highlight Overlay -->
+<div class="absolute left-[calc(60px+1*(100%-60px)/7)] w-[calc((100%-60px)/7)] top-0 bottom-0 bg-slate-50/80 rounded-2xl pointer-events-none -z-0 border-x border-slate-100/60"></div>
+<!-- Current Time Indicator Line (09:45) -->
+<div class="absolute left-[60px] right-0 top-[175px] flex items-center z-20 pointer-events-none">
+<div class="w-2.5 h-2.5 rounded-full bg-[#527cf6] -ml-1 border-2 border-white shadow"></div>
+<div class="w-full border-t-2 border-[#527cf6]/80"></div>
+</div>
+<!-- Time Axis (Left side) -->
+<div class="flex flex-col text-[11px] font-medium text-slate-500 select-none py-1">
+<div class="h-[52px]">08:30</div>
+<div class="h-[52px]">09:00</div>
+<div class="h-[52px]">09:30</div>
+<div class="h-[52px]">09:45</div>
+<div class="h-[52px]">10:30</div>
+<div class="h-[52px]">11:00</div>
+</div>
+<!-- Monday Column -->
+<div class="calendar-day-col relative h-[320px] rounded-xl border border-dashed border-slate-200/50 hover:border-[#527cf6]/60 transition flex flex-col justify-start p-1.5 gap-1.5 cursor-pointer" data-day="Monday"><div class="text-[10px] text-slate-300 font-medium select-none text-center py-1 hover:text-slate-500">+ Add</div><div class="calendar-tasks flex flex-col gap-1 w-full"></div></div>
+<!-- Tuesday Column -->
+<div class="calendar-day-col relative h-[320px] z-10 rounded-xl border border-dashed border-[#527cf6]/40 hover:border-[#527cf6]/80 transition flex flex-col justify-start p-1.5 gap-1.5 bg-[#527cf6]/[0.02] cursor-pointer" data-day="Tuesday"><div class="text-[10px] text-[#527cf6] font-medium text-center leading-tight py-1">+ Schedule</div><div class="calendar-tasks flex flex-col gap-1 w-full"></div></div>
+<!-- Wednesday Column -->
+<div class="calendar-day-col relative h-[320px] rounded-xl border border-dashed border-slate-200/50 hover:border-[#527cf6]/60 transition flex flex-col justify-start p-1.5 gap-1.5 cursor-pointer" data-day="Wednesday"><div class="text-[10px] text-slate-300 font-medium select-none text-center py-1 hover:text-slate-500">+ Add</div><div class="calendar-tasks flex flex-col gap-1 w-full"></div></div>
+<!-- Thursday Column -->
+<div class="calendar-day-col relative h-[320px] rounded-xl border border-dashed border-slate-200/50 hover:border-[#527cf6]/60 transition flex flex-col justify-start p-1.5 gap-1.5 cursor-pointer" data-day="Thursday"><div class="text-[10px] text-slate-300 font-medium select-none text-center py-1 hover:text-slate-500">+ Add</div><div class="calendar-tasks flex flex-col gap-1 w-full"></div></div>
+<!-- Friday Column -->
+<div class="calendar-day-col relative h-[320px] rounded-xl border border-dashed border-slate-200/50 hover:border-[#527cf6]/60 transition flex flex-col justify-start p-1.5 gap-1.5 cursor-pointer" data-day="Friday"><div class="text-[10px] text-slate-300 font-medium select-none text-center py-1 hover:text-slate-500">+ Add</div><div class="calendar-tasks flex flex-col gap-1 w-full"></div></div>
+<!-- Saturday Column -->
+<div class="calendar-day-col relative h-[320px] rounded-xl border border-dashed border-slate-200/50 hover:border-[#527cf6]/60 transition flex flex-col justify-start p-1.5 gap-1.5 cursor-pointer" data-day="Saturday"><div class="text-[10px] text-slate-300 font-medium select-none text-center py-1 hover:text-slate-500">+ Add</div><div class="calendar-tasks flex flex-col gap-1 w-full"></div></div>
+<!-- Sunday Column -->
+<div class="calendar-day-col relative h-[320px] rounded-xl border border-dashed border-slate-200/50 hover:border-[#527cf6]/60 transition flex flex-col justify-start p-1.5 gap-1.5 cursor-pointer" data-day="Sunday"><div class="text-[10px] text-slate-300 font-medium select-none text-center py-1 hover:text-slate-500">+ Add</div><div class="calendar-tasks flex flex-col gap-1 w-full"></div></div></div>
+</div>
+</div>
+</section>
+<!-- END: TaskManagementScheduleSection -->
+</div>
+<!-- END: DashboardWrapper -->
+<!-- BEGIN: AddTaskModal -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 transition-all duration-200 hidden" id="task-modal">
+<div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-100">
+<!-- Modal Header -->
+<div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-[#f8fafc]/60">
+<div class="flex items-center gap-2">
+<span class="w-7 h-7 rounded-full bg-[#1F1F1F] text-white flex items-center justify-center font-bold text-sm">+</span>
+<h3 class="text-base font-bold text-slate-800 tracking-tight" id="modal-heading">Create New Task</h3>
+</div>
+<button class="w-8 h-8 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center transition" id="btn-close-modal" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+</div>
+<!-- Modal Form Content -->
+<form class="p-6 flex flex-col gap-4 text-xs" id="create-task-form">
+<input id="task-edit-id" type="hidden" value=""/>
+<!-- Task Title -->
+<div>
+<label class="block font-semibold text-slate-700 mb-1.5" for="task-title-input">Task Title</label>
+<input class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1F1F1F] focus:ring-1 focus:ring-[#1F1F1F] transition" id="task-title-input" placeholder="e.g., Redesign Mobile App UI" required="" type="text"/>
+</div>
+<!-- Category & Stage Row -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+<div>
+<label class="block font-semibold text-slate-700 mb-1.5" for="task-category-input">Category / Board</label>
+<select class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-700 bg-white focus:outline-none focus:border-[#1F1F1F] focus:ring-1 focus:ring-[#1F1F1F] transition" id="task-category-input">
+<option value="Assignments">🟣 Assignments</option>
+<option value="Team Projects">🔵 Team Projects</option>
+<option value="Personal Goal">🟡 Personal Goal</option>
+<option value="Courses">🌸 Courses</option>
+</select>
+</div>
+<div>
+<label class="block font-semibold text-slate-700 mb-1.5" for="task-stage-input">Workflow Stage</label>
+<select class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-700 bg-white focus:outline-none focus:border-[#1F1F1F] focus:ring-1 focus:ring-[#1F1F1F] transition" id="task-stage-input">
+<option value="Draft">Draft</option>
+<option value="In Progress">In Progress</option>
+<option value="Editing">Editing</option>
+<option value="Done">Done</option>
+</select>
+</div>
+</div>
+<!-- Estimated Hours & Time Slot Row -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+<div>
+<label class="block font-semibold text-slate-700 mb-1.5" for="task-day-input">Day</label>
+<select class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-700 bg-white focus:outline-none focus:border-[#1F1F1F] focus:ring-1 focus:ring-[#1F1F1F] transition" id="task-day-input">
+<option value="Monday">Monday</option>
+<option selected="" value="Tuesday">Tuesday</option>
+<option value="Wednesday">Wednesday</option>
+<option value="Thursday">Thursday</option>
+<option value="Friday">Friday</option>
+<option value="Saturday">Saturday</option>
+<option value="Sunday">Sunday</option>
+</select>
+</div>
+<div>
+<label class="block font-semibold text-slate-700 mb-1.5" for="task-timeslot-input">Scheduled Slot</label>
+<select class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-700 bg-white focus:outline-none focus:border-[#1F1F1F] focus:ring-1 focus:ring-[#1F1F1F] transition" id="task-timeslot-input">
+<option value="08:30">08:30 - 09:00</option>
+<option value="09:00">09:00 - 09:30</option>
+<option selected="" value="09:30">09:30 - 10:30</option>
+<option value="09:45">09:45 - 10:30</option>
+<option value="10:30">10:30 - 11:00</option>
+<option value="11:00">11:00 - 11:30</option>
+</select>
+</div>
+<div>
+<label class="block font-semibold text-slate-700 mb-1.5" for="task-hours-input">Estimated Time</label>
+<input class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1F1F1F] focus:ring-1 focus:ring-[#1F1F1F] transition" id="task-hours-input" placeholder="e.g. 2 hrs" type="text" value="2 hrs"/>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center justify-end gap-2.5 pt-3 mt-2 border-t border-slate-100">
+<button class="px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-full transition" id="btn-cancel-modal" type="button">Cancel</button>
+<button class="px-5 py-2 text-xs font-medium text-white bg-[#1F1F1F] hover:bg-[#141414] rounded-full shadow-sm transition flex items-center gap-1.5" id="btn-submit-task" type="submit">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span id="btn-submit-text">Add Task</span>
+</button>
+</div>
+</form>
+</div>
+</div>
+<!-- Toast Notification -->
+<div class="hidden fixed bottom-6 right-6 z-50 bg-[#1F1F1F] text-white px-4 py-2.5 rounded-xl shadow-xl border border-slate-800 flex items-center gap-2.5 text-xs transition duration-300 transform translate-y-2 opacity-0" id="task-toast">
+<span class="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold">✓</span>
+<span id="toast-message">Task updated successfully!</span>
+</div>
+<script id="dashboard-full-interactive-logic">
+(function() {
+  // Global State for Tasks
+  var tasks = [
+    {
+      id: 'task-1',
+      title: 'Design System Typography & Tokens',
+      category: 'Assignments',
+      stage: 'Draft',
+      day: 'Monday',
+      slot: '09:00',
+      hours: '3.5 hrs',
+      comments: 2,
+      attachments: 1
+    },
+    {
+      id: 'task-2',
+      title: 'Realtime WebSocket Sync Engine',
+      category: 'Team Projects',
+      stage: 'In Progress',
+      day: 'Tuesday',
+      slot: '09:30',
+      hours: '4.0 hrs',
+      comments: 5,
+      attachments: 3
+    },
+    {
+      id: 'task-3',
+      title: 'Review Sprint Deliverables & Code',
+      category: 'Personal Goal',
+      stage: 'Editing',
+      day: 'Wednesday',
+      slot: '10:30',
+      hours: '1.5 hrs',
+      comments: 1,
+      attachments: 0
+    },
+    {
+      id: 'task-4',
+      title: 'Python Fast-API Microservice Module',
+      category: 'Courses',
+      stage: 'Done',
+      day: 'Tuesday',
+      slot: '08:30',
+      hours: '2.0 hrs',
+      comments: 4,
+      attachments: 2
+    }
+  ];
+
+  var categoryColors = {
+    'Assignments': { bg: 'bg-[#b388ff]/10', border: 'border-[#b388ff]/40', tagBg: 'bg-[#b388ff]/20', tagText: 'text-[#8244e8]', dot: 'bg-[#b388ff]' },
+    'Team Projects': { bg: 'bg-[#6b9dfa]/10', border: 'border-[#6b9dfa]/40', tagBg: 'bg-[#6b9dfa]/20', tagText: 'text-[#2563eb]', dot: 'bg-[#6b9dfa]' },
+    'Personal Goal': { bg: 'bg-[#fbc44f]/15', border: 'border-[#fbc44f]/40', tagBg: 'bg-[#fbc44f]/25', tagText: 'text-[#ca8a04]', dot: 'bg-[#fbc44f]' },
+    'Courses': { bg: 'bg-[#f97bb3]/10', border: 'border-[#f97bb3]/40', tagBg: 'bg-[#f97bb3]/20', tagText: 'text-[#db2777]', dot: 'bg-[#f97bb3]' }
+  };
+
+  var stagesOrder = ['Draft', 'In Progress', 'Editing', 'Done'];
+
+  // DOM Elements
+  var modal = document.getElementById('task-modal');
+  var form = document.getElementById('create-task-form');
+  var modalHeading = document.getElementById('modal-heading');
+  var submitBtnText = document.getElementById('btn-submit-text');
+  var taskIdInput = document.getElementById('task-edit-id');
+  var titleInput = document.getElementById('task-title-input');
+  var categoryInput = document.getElementById('task-category-input');
+  var stageInput = document.getElementById('task-stage-input');
+  var dayInput = document.getElementById('task-day-input');
+  var timeInput = document.getElementById('task-timeslot-input');
+  var hoursInput = document.getElementById('task-hours-input');
+  var toast = document.getElementById('task-toast');
+  var toastMsg = document.getElementById('toast-message');
+
+  function showToast(text) {
+    if (!toast || !toastMsg) return;
+    toastMsg.textContent = text;
+    toast.classList.remove('hidden');
+    requestAnimationFrame(function() {
+      toast.classList.remove('translate-y-2', 'opacity-0');
+    });
+    setTimeout(function() {
+      toast.classList.add('translate-y-2', 'opacity-0');
+      setTimeout(function() { toast.classList.add('hidden'); }, 300);
+    }, 2400);
+  }
+
+  function openTaskModal(prefill) {
+    if (!modal) return;
+    prefill = prefill || {};
+    taskIdInput.value = prefill.id || '';
+    if (prefill.id) {
+      modalHeading.textContent = 'Edit Task';
+      submitBtnText.textContent = 'Save Changes';
+    } else {
+      modalHeading.textContent = 'Create New Task';
+      submitBtnText.textContent = 'Add Task';
+    }
+    if (prefill.title !== undefined) titleInput.value = prefill.title;
+    else titleInput.value = '';
+    if (prefill.category) categoryInput.value = prefill.category;
+    if (prefill.stage) stageInput.value = prefill.stage;
+    if (prefill.day) dayInput.value = prefill.day;
+    if (prefill.slot) timeInput.value = prefill.slot;
+    if (prefill.hours) hoursInput.value = prefill.hours;
+    else if (!prefill.id) hoursInput.value = '2 hrs';
+
+    modal.classList.remove('hidden');
+    titleInput.focus();
+  }
+
+  function closeTaskModal() {
+    if (!modal) return;
+    modal.classList.add('hidden');
+    if (form) form.reset();
+    taskIdInput.value = '';
+  }
+
+  // Render Kanban and Schedule
+  function renderAll() {
+    stagesOrder.forEach(function(stg) {
+      var col = document.querySelector('.kanban-col[data-stage="' + stg + '"]');
+      if (!col) return;
+      var list = col.querySelector('.kanban-task-list');
+      var badge = col.querySelector('.badge-count');
+      var footerStat = col.querySelector('.footer-stat');
+      var emptyBtn = col.querySelector('.btn-open-kanban');
+
+      var stgTasks = tasks.filter(function(t) { return t.stage === stg; });
+      if (badge) badge.textContent = stgTasks.length;
+
+      // Update footer stats
+      if (footerStat) {
+        var count = stgTasks.length;
+        if (stg === 'Draft') footerStat.textContent = count + (count === 1 ? ' item saved' : ' items saved');
+        else if (stg === 'In Progress') footerStat.textContent = count + (count === 1 ? ' active timer' : ' active timers');
+        else if (stg === 'Editing') footerStat.textContent = count + (count === 1 ? ' under review' : ' under review');
+        else if (stg === 'Done') footerStat.textContent = (count > 0 ? (count * 25) + '% sprint progress' : '0% sprint progress');
+      }
+
+      // Update empty prompt visibility
+      if (emptyBtn) {
+        var titleSpan = emptyBtn.querySelector('.empty-col-title');
+        var subSpan = emptyBtn.querySelector('.empty-col-sub');
+        if (stgTasks.length === 0) {
+          if (titleSpan) titleSpan.textContent = 'No tasks in ' + stg;
+          if (subSpan) subSpan.textContent = 'Click to create task';
+        } else {
+          if (titleSpan) titleSpan.textContent = '+ Add another task';
+          if (subSpan) subSpan.textContent = 'Add to ' + stg;
+        }
+      }
+
+      if (list) {
+        list.innerHTML = '';
+        stgTasks.forEach(function(task) {
+          var meta = categoryColors[task.category] || categoryColors['Assignments'];
+          var currStageIndex = stagesOrder.indexOf(task.stage);
+          var prevStage = currStageIndex > 0 ? stagesOrder[currStageIndex - 1] : null;
+          var nextStage = currStageIndex < stagesOrder.length - 1 ? stagesOrder[currStageIndex + 1] : null;
+
+          var card = document.createElement('div');
+          card.className = 'group/card kanban-card relative p-3 rounded-xl border ' + meta.border + ' ' + meta.bg + ' bg-white hover:border-slate-400/80 shadow-sm transition-all text-left cursor-grab active:cursor-grabbing';
+          card.setAttribute('draggable', 'true');
+          card.setAttribute('data-task-id', task.id);
+
+          var isDone = task.stage === 'Done';
+
+          card.innerHTML =
+            '<div class="flex items-center justify-between gap-1 mb-1.5">' +
+              '<span class="text-[10px] font-semibold ' + meta.tagText + ' px-1.5 py-0.5 rounded-md ' + meta.tagBg + ' flex items-center gap-1 truncate">' +
+                '<span class="w-1.5 h-1.5 rounded-full ' + meta.dot + ' shrink-0"></span>' +
+                task.category +
+              '</span>' +
+              '<div class="flex items-center gap-1 shrink-0">' +
+                '<span class="text-[9px] text-slate-500 font-medium bg-slate-100/90 px-1.5 py-0.5 rounded-md">' + task.hours + '</span>' +
+                '<button type="button" class="btn-card-edit text-slate-400 hover:text-slate-700 p-0.5 rounded hover:bg-slate-100 transition" title="Edit Task">' +
+                  '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"></path></svg>' +
+                '</button>' +
+                '<button type="button" class="btn-card-delete text-slate-400 hover:text-red-600 p-0.5 rounded hover:bg-red-50 transition" title="Delete Task">' +
+                  '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round"></path></svg>' +
+                '</button>' +
+              '</div>' +
+            '</div>' +
+            '<div class="text-xs font-semibold text-slate-800 leading-snug mb-2 ' + (isDone ? 'line-through text-slate-400' : '') + '">' +
+              task.title +
+            '</div>' +
+            '<div class="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-100/60 mt-1">' +
+              '<div class="flex items-center gap-2">' +
+                '<span class="flex items-center gap-0.5 text-slate-500">' +
+                  '<svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path></svg>' +
+                  (task.comments || 1) +
+                '</span>' +
+                '<span class="flex items-center gap-0.5 text-slate-500">' +
+                  '<svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>' +
+                  (task.attachments || 1) +
+                '</span>' +
+              '</div>' +
+              '<div class="flex items-center gap-1">' +
+                (prevStage ? '<button type="button" class="btn-stage-shift px-1.5 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 text-[9px] font-bold transition" data-dest="' + prevStage + '" title="Move to ' + prevStage + '">◀</button>' : '') +
+                (nextStage ? '<button type="button" class="btn-stage-shift px-1.5 py-0.5 rounded bg-[#1F1F1F] hover:bg-[#141414] text-white text-[9px] font-bold transition" data-dest="' + nextStage + '" title="Move to ' + nextStage + '">▶</button>' : '') +
+              '</div>' +
+            '</div>';
+
+          // Drag Events
+          card.addEventListener('dragstart', function(e) {
+            e.dataTransfer.setData('text/plain', task.id);
+            card.classList.add('task-card-dragging');
+          });
+          card.addEventListener('dragend', function() {
+            card.classList.remove('task-card-dragging');
+          });
+
+          // Edit & Delete handlers
+          var editBtn = card.querySelector('.btn-card-edit');
+          if (editBtn) {
+            editBtn.addEventListener('click', function(e) {
+              e.stopPropagation();
+              openTaskModal(task);
+            });
+          }
+
+          var delBtn = card.querySelector('.btn-card-delete');
+          if (delBtn) {
+            delBtn.addEventListener('click', function(e) {
+              e.stopPropagation();
+              tasks = tasks.filter(function(t) { return t.id !== task.id; });
+              renderAll();
+              showToast('Task removed');
+            });
+          }
+
+          // Quick stage move buttons
+          card.querySelectorAll('.btn-stage-shift').forEach(function(shiftBtn) {
+            shiftBtn.addEventListener('click', function(e) {
+              e.stopPropagation();
+              var destStage = shiftBtn.getAttribute('data-dest');
+              task.stage = destStage;
+              renderAll();
+              showToast('Moved to ' + destStage);
+            });
+          });
+
+          list.appendChild(card);
+        });
+      }
+    });
+
+    renderCalendarTasks();
+    updateCategoryStats();
+  }
+
+  // Render Calendar entries
+  function renderCalendarTasks() {
+    document.querySelectorAll('.calendar-day-col').forEach(function(col) {
+      var day = col.getAttribute('data-day');
+      var container = col.querySelector('.calendar-tasks');
+      if (!container) return;
+      container.innerHTML = '';
+      var dayTasks = tasks.filter(function(t) { return t.day === day; });
+
+      dayTasks.forEach(function(task) {
+        var meta = categoryColors[task.category] || categoryColors['Assignments'];
+        var badge = document.createElement('div');
+        badge.className = 'scheduled-task-badge p-2 rounded-lg bg-white border ' + meta.border + ' shadow-sm text-left flex flex-col gap-0.5 hover:shadow transition';
+        badge.innerHTML =
+          '<div class="flex items-center justify-between"><span class="text-[9px] font-bold ' + meta.tagText + '">' + task.slot + '</span><span class="text-[8px] text-slate-400 font-medium">' + task.hours + '</span></div>' +
+          '<div class="text-[10px] font-semibold text-slate-800 truncate">' + task.title + '</div>' +
+          '<div class="flex items-center justify-between text-[8px] text-slate-500 pt-0.5"><span>' + task.stage + '</span><span class="w-1.5 h-1.5 rounded-full ' + meta.dot + '"></span></div>';
+
+        badge.addEventListener('click', function(e) {
+          e.stopPropagation();
+          openTaskModal(task);
+        });
+        container.appendChild(badge);
+      });
+    });
+  }
+
+  // Update Category Top Cards Stats
+  function updateCategoryStats() {
+    var categories = ['Assignments', 'Team Projects', 'Personal Goal', 'Courses'];
+    categories.forEach(function(cat) {
+      var card = document.querySelector('section[aria-label="Team Overview Cards"] > div[data-cat="' + cat + '"]');
+      if (!card) return;
+      var catTasks = tasks.filter(function(t) { return t.category === cat; });
+      var totalHrs = 0;
+      catTasks.forEach(function(t) {
+        var parsed = parseFloat(t.hours);
+        if (!isNaN(parsed)) totalHrs += parsed;
+      });
+      var hrsEl = card.querySelector('.cat-hrs');
+      if (hrsEl) hrsEl.textContent = (totalHrs > 0 ? totalHrs.toFixed(1) + ' hrs' : '0 hrs');
+
+      var subEl = card.querySelector('.cat-sub');
+      if (subEl) {
+        if (catTasks.length === 0) subEl.textContent = '0 active tasks • No active timers';
+        else subEl.textContent = catTasks.length + ' active ' + (catTasks.length === 1 ? 'task' : 'tasks') + ' • Active';
+      }
+
+      var doneCount = catTasks.filter(function(t) { return t.stage === 'Done'; }).length;
+      var pct = catTasks.length === 0 ? 0 : Math.round((doneCount / catTasks.length) * 100);
+      var barEl = card.querySelector('.cat-progress-bar');
+      if (barEl) barEl.style.width = pct + '%';
+      var textEl = card.querySelector('.cat-progress-text');
+      if (textEl) textEl.textContent = pct + '%';
+    });
+  }
+
+  // Setup Drag and Drop on Kanban Columns
+  document.querySelectorAll('.kanban-col').forEach(function(col) {
+    var list = col.querySelector('.kanban-task-list');
+    var targetStage = col.getAttribute('data-stage');
+
+    col.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      col.classList.add('kanban-drop-hover');
+    });
+    col.addEventListener('dragleave', function() {
+      col.classList.remove('kanban-drop-hover');
+    });
+    col.addEventListener('drop', function(e) {
+      e.preventDefault();
+      col.classList.remove('kanban-drop-hover');
+      var taskId = e.dataTransfer.getData('text/plain');
+      var matched = tasks.find(function(t) { return t.id === taskId; });
+      if (matched && matched.stage !== targetStage) {
+        matched.stage = targetStage;
+        renderAll();
+        showToast('Moved "' + matched.title + '" to ' + targetStage);
+      }
+    });
+  });
+
+  // Modal Open Buttons
+  var topAddBtn = document.getElementById('btn-add-task');
+  if (topAddBtn) topAddBtn.addEventListener('click', function() { openTaskModal(); });
+
+  var closeBtn = document.getElementById('btn-close-modal');
+  if (closeBtn) closeBtn.addEventListener('click', closeTaskModal);
+
+  var cancelBtn = document.getElementById('btn-cancel-modal');
+  if (cancelBtn) cancelBtn.addEventListener('click', closeTaskModal);
+
+  if (modal) {
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) closeTaskModal();
+    });
+  }
+
+  // Header quick add buttons on columns
+  document.querySelectorAll('.btn-quick-add').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var stage = btn.getAttribute('data-stage') || 'Draft';
+      openTaskModal({ stage: stage });
+    });
+  });
+
+  // Empty drop-zone buttons on columns
+  document.querySelectorAll('.btn-open-kanban').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var stage = btn.getAttribute('data-stage') || 'Draft';
+      openTaskModal({ stage: stage });
+    });
+  });
+
+  // Calendar columns click to add
+  document.querySelectorAll('.calendar-day-col').forEach(function(col) {
+    col.addEventListener('click', function(e) {
+      if (e.target.closest('.scheduled-task-badge')) return;
+      var day = col.getAttribute('data-day') || 'Tuesday';
+      openTaskModal({ day: day });
+    });
+  });
+
+  // Form Submit (Create or Edit)
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var editId = taskIdInput.value;
+      var title = (titleInput.value || '').trim() || 'Untitled Task';
+      var category = categoryInput.value || 'Assignments';
+      var stage = stageInput.value || 'Draft';
+      var day = dayInput.value || 'Tuesday';
+      var slot = timeInput.value || '09:30';
+      var hours = (hoursInput.value || '').trim() || '1 hr';
+
+      if (editId) {
+        var existing = tasks.find(function(t) { return t.id === editId; });
+        if (existing) {
+          existing.title = title;
+          existing.category = category;
+          existing.stage = stage;
+          existing.day = day;
+          existing.slot = slot;
+          existing.hours = hours;
+          showToast('Updated "' + title + '"');
+        }
+      } else {
+        var newTask = {
+          id: 'task-' + Date.now(),
+          title: title,
+          category: category,
+          stage: stage,
+          day: day,
+          slot: slot,
+          hours: hours,
+          comments: 0,
+          attachments: 0
+        };
+        tasks.push(newTask);
+        showToast('Created "' + title + '" in ' + stage);
+      }
+
+      renderAll();
+      closeTaskModal();
+    });
+  }
+
+  // Column Options 3-dot dropdowns (Sort, Clear, Collapse)
+  document.querySelectorAll('.options-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var menu = btn.parentElement.querySelector('.kanban-dropdown-menu');
+      var isHidden = menu.classList.contains('hidden');
+      document.querySelectorAll('.kanban-dropdown-menu').forEach(function(m) { m.classList.add('hidden'); });
+      if (isHidden) menu.classList.remove('hidden');
+    });
+  });
+
+  document.querySelectorAll('.menu-action-sort').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var col = btn.closest('.kanban-col');
+      var stage = col.getAttribute('data-stage');
+      var colTasks = tasks.filter(function(t) { return t.stage === stage; });
+      colTasks.sort(function(a, b) { return a.title.localeCompare(b.title); });
+      tasks = tasks.filter(function(t) { return t.stage !== stage; }).concat(colTasks);
+      renderAll();
+      document.querySelectorAll('.kanban-dropdown-menu').forEach(function(m) { m.classList.add('hidden'); });
+      showToast('Sorted ' + stage + ' A-Z');
+    });
+  });
+
+  document.querySelectorAll('.menu-action-clear').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var col = btn.closest('.kanban-col');
+      var stage = col.getAttribute('data-stage');
+      tasks = tasks.filter(function(t) { return t.stage !== stage; });
+      renderAll();
+      document.querySelectorAll('.kanban-dropdown-menu').forEach(function(m) { m.classList.add('hidden'); });
+      showToast('Cleared all tasks from ' + stage);
+    });
+  });
+
+  document.querySelectorAll('.menu-action-collapse').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var col = btn.closest('.kanban-col');
+      var taskList = col.querySelector('.kanban-task-list');
+      var openBtn = col.querySelector('.btn-open-kanban');
+      var isCollapsed = taskList.classList.contains('hidden');
+      if (isCollapsed) {
+        taskList.classList.remove('hidden');
+        if (openBtn) openBtn.classList.remove('hidden');
+        btn.innerHTML = '<span>◱</span> Collapse';
+      } else {
+        taskList.classList.add('hidden');
+        if (openBtn) openBtn.classList.add('hidden');
+        btn.innerHTML = '<span>◲</span> Expand';
+      }
+      document.querySelectorAll('.kanban-dropdown-menu').forEach(function(m) { m.classList.add('hidden'); });
+    });
+  });
+
+  // Header Dropdowns (Settings, Help, Notifications)
+  var btnSettings = document.getElementById('btn-settings');
+  var menuSettings = document.getElementById('menu-settings');
+  var btnHelp = document.getElementById('btn-help');
+  var menuHelp = document.getElementById('menu-help');
+  var btnNotif = document.getElementById('btn-notifications');
+  var menuNotif = document.getElementById('menu-notifications');
+  var notifBadge = document.getElementById('notif-badge');
+
+  function closeAllMenus() {
+    if (menuSettings) menuSettings.classList.add('hidden');
+    if (menuHelp) menuHelp.classList.add('hidden');
+    if (menuNotif) menuNotif.classList.add('hidden');
+    document.querySelectorAll('.kanban-dropdown-menu').forEach(function(m) { m.classList.add('hidden'); });
+  }
+
+  if (btnSettings && menuSettings) {
+    btnSettings.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var wasHidden = menuSettings.classList.contains('hidden');
+      closeAllMenus();
+      if (wasHidden) menuSettings.classList.remove('hidden');
+    });
+  }
+
+  if (btnHelp && menuHelp) {
+    btnHelp.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var wasHidden = menuHelp.classList.contains('hidden');
+      closeAllMenus();
+      if (wasHidden) menuHelp.classList.remove('hidden');
+    });
+  }
+
+  if (btnNotif && menuNotif) {
+    btnNotif.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var wasHidden = menuNotif.classList.contains('hidden');
+      closeAllMenus();
+      if (wasHidden) {
+        menuNotif.classList.remove('hidden');
+        if (notifBadge) notifBadge.classList.add('hidden');
+      }
+    });
+  }
+
+  document.addEventListener('click', function() {
+    closeAllMenus();
+  });
+
+  // Calendar View Switcher
+  var viewButtons = document.querySelectorAll('.view-toggle-btn');
+  viewButtons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      viewButtons.forEach(function(b) {
+        b.classList.remove('bg-[#1F1F1F]', 'text-white', 'px-5', 'shadow-sm');
+        b.classList.add('text-slate-600', 'px-4');
+      });
+      btn.classList.add('bg-[#1F1F1F]', 'text-white', 'px-5', 'shadow-sm');
+      btn.classList.remove('text-slate-600', 'px-4');
+      showToast('Switched to ' + btn.getAttribute('data-view') + ' view');
+    });
+  });
+
+  var btnViewMore = document.getElementById('btn-view-more');
+  if (btnViewMore) {
+    btnViewMore.addEventListener('click', function() {
+      showToast('Timeline filters & export options opened');
+    });
+  }
+
+  // Initial render
+  renderAll();
+})();
+</script>
+</body></html>

@@ -1,0 +1,2864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>MOMO - Campus Voice AI Agent</title>
+
+  <!-- Tailwind CSS CDN with Forms & Container Queries -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- Three.js Library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/threejs/r125/three.min.js"></script>
+
+  <!-- Google Fonts: Inter + Playfair Display + Source Serif 4 + Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Playfair Display"', '"Source Serif 4"', 'Georgia', 'serif'],
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+          },
+          colors: {
+            card: '#ffffff',
+            'card-foreground': '#09090b',
+            foreground: '#09090b',
+            muted: '#f4f4f5',
+            'muted-foreground': '#71717a',
+            border: '#e4e4e7',
+            brandCyan: '#26c6da',
+            appBg: '#FAFAFB',
+            appText: '#18181B',
+            subText: '#27272A',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom App Styling -->
+  <style data-purpose="custom-styling">
+    body {
+      background-color: #ffffff;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+      user-select: none;
+    }
+
+    .brand-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      letter-spacing: -0.015em;
+    }
+
+    /* Soft realistic card shadows matching subtle frosted neumorphic look */
+    .app-card-shadow {
+      background: radial-gradient(136.21% 100% at 50% 0%, #FFFFFF 0%, #F8F9FA 100%);
+      box-shadow: 
+        0 1px 2px rgba(0, 0, 0, 0.03),
+        0 14px 34px -8px rgba(0, 0, 0, 0.05),
+        inset 0 1px 1px rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(229, 231, 235, 0.45);
+    }
+
+    .app-card-shadow:hover {
+      box-shadow: 
+        0 10px 30px -4px rgba(0, 0, 0, 0.08),
+        0 4px 12px rgba(0, 0, 0, 0.03),
+        inset 0 1px 2px rgba(255, 255, 255, 1);
+    }
+
+    /* Center Momo glow aura */
+    .momo-glow {
+      box-shadow: 
+        0 -12px 35px -5px rgba(0, 0, 0, 0.07),
+        0 16px 40px -10px rgba(0, 0, 0, 0.06),
+        inset 0 1px 1.5px rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(229, 231, 235, 0.5);
+    }
+
+    /* 3D Rendered Mini Sphere for Momo Launcher */
+    .momo-sphere {
+      width: 148px;
+      height: 148px;
+      border-radius: 50%;
+      position: relative;
+      background: radial-gradient(circle at 35% 32%, #43464C 0%, #202226 28%, #111215 56%, #050608 100%);
+      box-shadow: 
+        inset 2px 3px 6px rgba(255, 255, 255, 0.32),
+        inset -5px -6px 14px rgba(0, 0, 0, 0.85),
+        inset -1px -2px 5px rgba(255, 255, 255, 0.12),
+        0 18px 28px -6px rgba(0, 0, 0, 0.38),
+        0 6px 12px rgba(0, 0, 0, 0.22);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+    }
+
+    .momo-sphere::before {
+      content: '';
+      position: absolute;
+      top: 24px;
+      right: 34px;
+      width: 17px;
+      height: 14px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.45) 50%, rgba(255, 255, 255, 0) 100%);
+      filter: blur(0.7px);
+      transform: rotate(-15deg);
+    }
+
+    .momo-sphere::after {
+      content: '';
+      position: absolute;
+      bottom: 44px;
+      left: 30px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 80%);
+      filter: blur(0.6px);
+    }
+
+    /* Momo Mini Capsule Eyes */
+    .momo-eye {
+      width: 9.5px;
+      height: 25px;
+      background-color: #FFFFFF;
+      border-radius: 9999px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.85);
+      transition: transform 0.16s ease, height 0.16s ease;
+    }
+
+    .momo-sphere:hover .momo-eye {
+      box-shadow: 0 0 14px rgba(255, 255, 255, 1);
+    }
+
+    /* Calendar 3D Icon styling */
+    .calendar-body {
+      background: linear-gradient(180deg, #F3F4F6 0%, #E5E7EB 100%);
+      box-shadow: 
+        0 6px 12px rgba(0, 0, 0, 0.08),
+        0 2px 4px rgba(0, 0, 0, 0.04),
+        inset 0 1px 1px rgba(255, 255, 255, 0.9);
+    }
+
+    .calendar-top-header {
+      background: linear-gradient(180deg, #3F4249 0%, #2A2C31 100%);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    /* Task Notebook 3D Icon styling */
+    .task-body {
+      background: linear-gradient(180deg, #F9FAFB 0%, #E8EBF0 100%);
+      box-shadow: 
+        0 8px 16px rgba(0, 0, 0, 0.08),
+        0 2px 4px rgba(0, 0, 0, 0.04),
+        inset 0 1px 2px rgba(255, 255, 255, 0.9);
+    }
+
+    /* Custom thin scrollbar for ScrollArea */
+    #ai-response-scroll-area::-webkit-scrollbar {
+      width: 5px;
+    }
+    #ai-response-scroll-area::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    #ai-response-scroll-area::-webkit-scrollbar-thumb {
+      background: #e4e4e7;
+      border-radius: 9999px;
+    }
+    #ai-response-scroll-area::-webkit-scrollbar-thumb:hover {
+      background: #d4d4d8;
+    }
+
+    .state-pill {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .task-card-dragging {
+      opacity: 0.45;
+      transform: scale(0.98);
+    }
+    .kanban-drop-hover {
+      background-color: #f8fafc;
+      border-color: #6366f1;
+    }
+
+    /* Planner Calendar Styles */
+    .cal-cell {
+      min-height: 104px;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+    .cal-cell:hover:not(.has-popover) {
+      background-color: #fafbfc;
+    }
+    .text-micro {
+      font-size: 8px;
+      line-height: 10px;
+    }
+    @keyframes pulse-sphere {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.4); }
+      50% { transform: scale(1.08); box-shadow: 0 0 16px 4px rgba(0, 240, 255, 0.25); }
+    }
+    .sphere-listening {
+      animation: pulse-sphere 1.4s ease-in-out infinite;
+    }
+    @keyframes soundwave {
+      0%, 100% { height: 4px; }
+      50% { height: 16px; }
+    }
+    .wave-bar-1 { animation: soundwave 0.8s ease-in-out infinite 0.1s; }
+    .wave-bar-2 { animation: soundwave 0.8s ease-in-out infinite 0.25s; }
+    .wave-bar-3 { animation: soundwave 0.8s ease-in-out infinite 0.4s; }
+    .wave-bar-4 { animation: soundwave 0.8s ease-in-out infinite 0.15s; }
+
+  </style>
+</head>
+<body class="min-h-screen bg-white text-neutral-900 flex flex-col font-sans relative overflow-x-hidden">
+
+  <!-- BEGIN: MainHeader -->
+  <header class="w-full pt-4 pb-4 px-6 md:px-10 lg:px-14 flex items-center justify-between z-30 relative bg-white/80 backdrop-blur-md" data-purpose="site-header">
+    <div class="flex items-center gap-4" data-purpose="brand-container">
+      <!-- Back to Launcher Button -->
+      <button id="back-to-home-btn" onclick="goHome()" class="hidden items-center gap-2 text-sm font-medium text-neutral-600 hover:text-black py-1.5 px-3.5 rounded-full bg-neutral-100 hover:bg-neutral-200 transition-all duration-200 cursor-pointer" title="Back to Launcher">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"></path>
+        </svg>
+        <span>Back</span>
+      </button>
+
+      <h1 class="brand-title text-2xl md:text-3xl font-semibold text-black tracking-normal select-none cursor-pointer" onclick="goHome()">
+        MOMO - Campus Voice AI Agent
+      </h1>
+    </div>
+
+    <!-- Notification Actions -->
+    <div class="flex items-center pr-1" data-purpose="user-notifications">
+      <button aria-label="View notifications" class="relative p-2 text-neutral-800 hover:text-black transition-colors focus:outline-none focus:ring-1 focus:ring-neutral-200 rounded-full hover:bg-neutral-100" data-purpose="notification-bell-btn" type="button">
+        <svg class="w-5 h-5 text-neutral-900" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+          <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+        </svg>
+        <span aria-hidden="true" class="absolute top-1.5 right-1.5 w-[6px] h-[6px] rounded-full bg-[#2fd0df] ring-2 ring-white" data-purpose="notification-indicator"></span>
+      </button>
+    </div>
+  </header>
+  <!-- END: MainHeader -->
+
+  <!-- ========================================== -->
+  <!-- SECTION 1: HOME LAUNCHER VIEW              -->
+  <!-- ========================================== -->
+  <main id="home-launcher-section" class="relative z-10 flex-1 w-full flex items-center justify-center px-6 md:px-12 lg:px-16 py-6 md:py-10 transition-opacity duration-500" data-purpose="main-canvas">
+    <div class="w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-stretch justify-between gap-12 lg:gap-16">
+      
+      <!-- Left Column / Greeting & Clock -->
+      <div class="w-full lg:w-1/2 flex flex-col justify-between py-4 sm:py-8" data-purpose="side-panel">
+        <header class="text-left" data-purpose="greeting-header">
+          <h2 class="text-3xl sm:text-4xl lg:text-[42px] font-medium tracking-tight text-neutral-800 leading-tight">
+            Good Morning , Faizu!
+          </h2>
+          <p class="text-lg sm:text-xl lg:text-[22px] font-normal text-neutral-800 mt-3 tracking-tight">
+            How can I assist you today?
+          </p>
+        </header>
+
+        <div class="mt-14 lg:mt-0 flex flex-col items-start select-none" data-purpose="clock-and-date">
+          <time class="text-6xl sm:text-7xl lg:text-8xl font-light tracking-tight text-neutral-900 leading-none" id="liveClock">
+            09:10
+          </time>
+          <span class="text-sm sm:text-base font-normal text-neutral-700 mt-3 sm:mt-4 tracking-tight pl-1" id="liveDate">
+            28 Oct, Fri, 2026
+          </span>
+        </div>
+      </div>
+
+      <!-- Right Column / Cards Launcher Dock -->
+      <div class="w-full lg:w-1/2 flex items-center justify-center lg:justify-end" data-purpose="app-selection-cards">
+        <div class="flex flex-col sm:flex-row lg:flex-col items-center justify-center gap-6 sm:gap-7 w-full max-w-md lg:max-w-none">
+          
+          <!-- Planner Card (Click to open Calendar Schedule & Planner) -->
+          <div id="planner-launcher-card" onclick="openPlanner()" class="flex items-center gap-6 group cursor-pointer transition-transform duration-300 hover:translate-x-2 select-none" data-purpose="planner-item" title="Click to open Planner">
+            <div class="w-40 h-40 sm:w-44 sm:h-44 md:w-48 md:h-48 rounded-[2.2rem] app-card-shadow flex items-center justify-center p-5 transition-all duration-300 shrink-0 group-hover:scale-[1.02] ring-2 ring-transparent group-hover:ring-blue-300/40 cursor-pointer">
+              <div class="relative w-24 h-24 flex flex-col items-center justify-center" data-purpose="calendar-graphic">
+                <div class="absolute -top-1.5 w-full flex justify-around px-3 z-20 pointer-events-none">
+                  <div class="w-3.5 h-6 rounded-full bg-gradient-to-r from-zinc-700 via-zinc-500 to-zinc-800 shadow-sm border border-zinc-600/60"></div>
+                  <div class="w-3.5 h-6 rounded-full bg-gradient-to-r from-zinc-700 via-zinc-500 to-zinc-800 shadow-sm border border-zinc-600/60"></div>
+                </div>
+                <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden calendar-body border border-zinc-200/80 flex flex-col shadow-sm">
+                  <div class="h-6 calendar-top-header w-full flex items-center justify-center relative"></div>
+                  <div class="flex-grow p-2.5 flex flex-col justify-between">
+                    <div class="flex justify-between items-center px-1">
+                      <span class="w-2 h-2 rounded-full bg-zinc-300"></span>
+                      <span class="w-2 h-2 rounded-full bg-zinc-300"></span>
+                      <span class="w-2 h-2 rounded-full bg-zinc-300"></span>
+                      <span class="w-2 h-2 rounded-full bg-zinc-300"></span>
+                    </div>
+                    <div class="flex justify-between items-center px-1">
+                      <span class="w-2 h-2 rounded-full bg-zinc-300"></span>
+                      <span class="w-2.5 h-2.5 rounded-md bg-zinc-700 shadow-xs"></span>
+                      <span class="w-2 h-2 rounded-full bg-zinc-300"></span>
+                      <span class="w-2 h-2 rounded-full bg-zinc-300"></span>
+                    </div>
+                    <div class="flex justify-between items-center px-1">
+                      <span class="w-2 h-2 rounded-full bg-zinc-300"></span>
+                      <span class="w-2 h-2 rounded-full bg-zinc-300"></span>
+                      <span class="w-2 h-2 rounded-full bg-zinc-300"></span>
+                      <span class="w-2 h-2 rounded-full bg-zinc-300"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="flex flex-col cursor-pointer">
+              <span class="text-lg md:text-xl font-normal text-neutral-800 tracking-normal transition-colors group-hover:text-black min-w-[70px]">Planner</span>
+              <span class="text-xs text-neutral-400 group-hover:text-blue-500 font-medium transition-colors">Tap to open</span>
+            </div>
+          </div>
+
+          <!-- Momo Card (Click to open Three.js 3D Sphere!) -->
+          <div id="momo-launcher-card" onclick="openMomoVoice()" class="flex items-center gap-6 group cursor-pointer transition-transform duration-300 hover:translate-x-2 select-none" data-purpose="momo-item" title="Click to talk with Momo">
+            <div class="w-40 h-40 sm:w-44 sm:h-44 md:w-48 md:h-48 rounded-[2.2rem] momo-glow bg-gradient-to-b from-white via-white to-gray-50/70 flex items-center justify-center p-5 transition-all duration-300 relative shrink-0 group-hover:scale-[1.03] ring-2 ring-transparent group-hover:ring-cyan-300/40 cursor-pointer">
+              <div class="momo-sphere flex items-center justify-center gap-2.5 scale-90" data-purpose="momo-avatar" id="momoOrb">
+                <div class="momo-eye" id="leftEye"></div>
+                <div class="momo-eye" id="rightEye"></div>
+              </div>
+            </div>
+            <div class="flex flex-col cursor-pointer">
+              <span class="text-lg md:text-xl font-medium text-neutral-900 tracking-normal transition-colors group-hover:text-black min-w-[70px]">Momo</span>
+              <span class="text-xs text-neutral-400 group-hover:text-cyan-500 font-medium transition-colors">Tap to launch</span>
+            </div>
+          </div>
+
+          <!-- Task Card (Click to open Time Tracker & Task Management Dashboard) -->
+          <div id="task-launcher-card" onclick="openTaskManagement()" class="flex items-center gap-6 group cursor-pointer transition-transform duration-300 hover:translate-x-2 select-none" data-purpose="task-item" title="Click to open Task Management">
+            <div class="w-40 h-40 sm:w-44 sm:h-44 md:w-48 md:h-48 rounded-[2.2rem] app-card-shadow flex items-center justify-center p-5 transition-all duration-300 shrink-0 group-hover:scale-[1.02] ring-2 ring-transparent group-hover:ring-indigo-300/40 cursor-pointer">
+              <div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl task-body border border-zinc-200 p-3.5 flex flex-col justify-center space-y-2.5 shadow-sm" data-purpose="task-graphic">
+                <div class="flex items-center space-x-2">
+                  <div class="w-4.5 h-4.5 rounded-[4px] bg-zinc-800 flex items-center justify-center shadow-xs shrink-0">
+                    <svg class="w-2.5 h-2.5 text-white stroke-[3.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                  </div>
+                  <div class="h-2 w-10 bg-zinc-800 rounded-full"></div>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <div class="w-4.5 h-4.5 rounded-[4px] bg-zinc-300/80 shrink-0"></div>
+                  <div class="h-2 w-10 bg-zinc-400 rounded-full"></div>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <div class="w-4.5 h-4.5 rounded-[4px] bg-zinc-300/80 shrink-0"></div>
+                  <div class="h-2 w-10 bg-zinc-400 rounded-full"></div>
+                </div>
+              </div>
+            </div>
+            <div class="flex flex-col cursor-pointer">
+              <span class="text-lg md:text-xl font-normal text-neutral-800 tracking-normal transition-colors group-hover:text-black min-w-[70px]">Task</span>
+              <span class="text-xs text-neutral-400 group-hover:text-indigo-500 font-medium transition-colors">Tap to open</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ========================================== -->
+  <!-- SECTION 2: THREE.JS 3D MOMO SPHERE VIEW    -->
+  <!-- ========================================== -->
+  <section id="momo-voice-section" class="hidden fixed inset-0 pt-16 w-full h-full flex flex-col bg-white z-20 opacity-0 pointer-events-none transition-opacity duration-500 overflow-hidden" data-purpose="threejs-sphere-section">
+    
+    <!-- Three.js Canvas Container (Full Screen Background - pointer-events-none so it never blocks UI clicks) -->
+    <div id="threejs-container-ANIMATION_12" class="absolute inset-0 w-full h-full pointer-events-none"></div>
+
+    <!-- Main Content Area: Split layout when Thinking/Responding -->
+    <div class="relative z-20 flex-1 w-full max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between px-6 sm:px-10 lg:px-16 pointer-events-none pb-32 sm:pb-36 pt-2">
+      
+      <!-- Left Half spacer (where displaced sphere floats) -->
+      <div class="w-full lg:w-1/2 h-full flex items-center justify-center pointer-events-none">
+        <!-- Interactive Canvas region takes left half -->
+      </div>
+
+      <!-- Right Half: AgentChat Container (Exact component structure matching agent-chat.tsx) -->
+      <div id="ai-response-container" class="w-full lg:w-1/2 flex items-center justify-center lg:justify-end py-2 transition-all duration-700 ease-out opacity-0 pointer-events-none translate-x-8">
+        
+        <div class="pointer-events-auto w-full max-w-[600px] h-[380px] sm:h-[430px] max-h-[calc(100vh-240px)] rounded-xl border border-neutral-200 dark:border-neutral-800 overflow-hidden bg-white dark:bg-neutral-900 shadow-sm flex flex-col">
+          
+          <!-- MessageList -->
+          <div id="chat-messages-scroll" class="flex-1 min-h-0 overflow-y-auto px-4 py-5 scroll-smooth">
+            <div id="chat-messages-list" class="mx-auto max-w-[600px] flex flex-col gap-3.5">
+              <div class="flex justify-start">
+                <div class="max-w-[90%] text-sm leading-relaxed text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap break-words">
+                  All systems are green. How can I assist your campus schedule today?
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- InputBar matching AgentChat component -->
+          <div class="shrink-0 px-3 pb-3 w-full">
+            <div class="mx-auto max-w-[600px]">
+              <div class="relative cursor-text rounded-[16px] bg-white dark:bg-neutral-900 shadow-sm ring-1 ring-neutral-200 dark:ring-neutral-800">
+                <div class="pt-2.5 pb-0 pr-3 pl-3.5 min-h-[42px]">
+                  <textarea id="chat-textarea" rows="1" placeholder="Send a message..." class="w-full resize-none bg-transparent border-0 outline-none text-[14px] leading-[1.6] text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 overflow-hidden"></textarea>
+                </div>
+                <div class="flex items-center justify-between gap-3 px-2 pt-1 pb-2">
+                  <div class="flex items-center gap-1 min-w-0">
+                    <button type="button" aria-label="Attach" class="inline-flex items-center justify-center w-8 h-8 rounded-full text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"></path>
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="flex items-center gap-1">
+                    <button id="chat-submit-btn" type="button" aria-label="Send" class="inline-flex items-center justify-center w-8 h-8 rounded-full transition-all duration-150 bg-neutral-200 text-neutral-400 dark:bg-neutral-800 dark:text-neutral-600">
+                      <svg id="chat-send-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="19" x2="12" y2="5"></line>
+                        <polyline points="5 12 12 5 19 12"></polyline>
+                      </svg>
+                      <svg id="chat-stop-icon" class="hidden" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                        <rect x="6" y="6" width="12" height="12" rx="1"></rect>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Voice Interface Overlay at Bottom (Guaranteed Visible with Ample Padding) -->
+    <div id="voice-interface-container" class="absolute inset-x-0 bottom-4 sm:bottom-6 z-30 pointer-events-none flex flex-col items-center px-4">
+      <div class="pointer-events-auto flex flex-col items-center gap-2.5">
+        
+        <!-- Microphone Button with Glowing Aura Ring -->
+        <div class="relative flex items-center justify-center">
+          <div id="mic-pulse-ring" class="absolute -inset-4 rounded-full bg-cyan-400/20 blur-md opacity-0 transition-opacity duration-300"></div>
+          <button id="mic-toggle-btn" onclick="toggleMic()" aria-label="Toggle microphone" class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#1F1F1F] text-white flex items-center justify-center border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.35)] transition-all duration-300 hover:scale-105 active:scale-95 hover:border-cyan-400/50 hover:bg-[#2A2A2A] focus:outline-none cursor-pointer">
+            <span id="mic-icon" class="material-symbols-outlined text-2xl sm:text-3xl text-white transition-colors duration-200">mic</span>
+          </button>
+        </div>
+
+        <!-- Voice Status Text & Sound Wave -->
+        <div class="flex items-center gap-2 mt-0.5">
+          <div id="status-wave" class="hidden flex items-center gap-1 h-4">
+            <span class="w-1 h-2 bg-cyan-400 rounded-full animate-bounce"></span>
+            <span class="w-1 h-4 bg-cyan-300 rounded-full animate-bounce [animation-delay:0.15s]"></span>
+            <span class="w-1 h-3 bg-cyan-400 rounded-full animate-bounce [animation-delay:0.3s]"></span>
+            <span class="w-1 h-5 bg-cyan-200 rounded-full animate-bounce [animation-delay:0.45s]"></span>
+          </div>
+          <p id="voice-status-text" class="text-xs sm:text-sm tracking-wide font-medium transition-all duration-300 text-gray-700">
+            Tap microphone to speak
+          </p>
+        </div>
+
+        <!-- Interactive Voice State Simulation Pills -->
+        <div class="flex items-center gap-1.5 mt-0.5 bg-neutral-100/95 backdrop-blur-sm p-1 rounded-full border border-neutral-200 shadow-sm">
+          <button onclick="setState('Idle')" data-state="Idle" class="state-pill px-3 py-1 text-xs rounded-full font-medium transition-all duration-200 bg-neutral-900 text-white shadow-xs">
+            Idle
+          </button>
+          <button onclick="setState('Listening')" data-state="Listening" class="state-pill px-3 py-1 text-xs rounded-full font-medium transition-all duration-200 text-neutral-600 hover:text-black">
+            Listening
+          </button>
+          <button onclick="setState('Thinking')" data-state="Thinking" class="state-pill px-3 py-1 text-xs rounded-full font-medium transition-all duration-200 text-neutral-600 hover:text-black">
+            Thinking
+          </button>
+          <button onclick="setState('Speaking')" data-state="Speaking" class="state-pill px-3 py-1 text-xs rounded-full font-medium transition-all duration-200 text-neutral-600 hover:text-black">
+            Speaking
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- SECTION 3: TIME TRACKER & TASK MANAGEMENT DASHBOARD VIEW -->
+  <!-- ======================================================== -->
+  <section id="task-management-section" class="hidden w-full flex-1 flex flex-col items-center justify-start px-3 md:px-6 py-4 md:py-6 transition-opacity duration-500 opacity-0 pointer-events-none" data-purpose="task-management-section">
+<!-- BEGIN: DashboardWrapper -->
+<div class="w-full max-w-[1240px] bg-[#f8fafc]/90 rounded-3xl p-5 md:p-7 shadow-sm border border-slate-100 flex flex-col gap-6">
+<!-- BEGIN: TopHeader -->
+<header class="flex items-center justify-between">
+<h1 class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">Time Tracker</h1>
+<!-- Top Action Icons -->
+<div class="flex items-center gap-2.5">
+<button class="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#1F1F1F] hover:bg-[#141414] text-white rounded-full font-medium text-xs shadow-sm transition" id="btn-add-task" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span>Add Task</span>
+</button>
+<div class="relative">
+<button aria-label="Settings" class="w-9 h-9 rounded-full bg-white border border-slate-200/80 flex items-center justify-center text-slate-500 hover:text-slate-700 shadow-sm transition" id="btn-settings" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><path d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" stroke-linecap="round" stroke-linejoin="round"></path><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+<div class="hidden absolute right-0 top-11 w-44 bg-white rounded-xl shadow-lg border border-slate-100 p-2 z-50 text-xs text-slate-700 flex flex-col gap-1" id="menu-settings">
+<div class="font-semibold px-2 py-1 text-slate-800 border-b border-slate-100">Preferences</div>
+<button class="text-left px-2 py-1.5 rounded-lg hover:bg-slate-50 transition" type="button">Dashboard Settings</button>
+<button class="text-left px-2 py-1.5 rounded-lg hover:bg-slate-50 transition" type="button">Timer Defaults</button>
+</div>
+</div>
+<div class="relative">
+<button aria-label="Help" class="w-9 h-9 rounded-full bg-white border border-slate-200/80 flex items-center justify-center text-slate-500 hover:text-slate-700 shadow-sm transition" id="btn-help" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M12 18h.01" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+<div class="hidden absolute right-0 top-11 w-48 bg-white rounded-xl shadow-lg border border-slate-100 p-2.5 z-50 text-xs text-slate-600" id="menu-help">
+<div class="font-bold text-slate-800 mb-1">Quick Guide</div>
+<p class="text-[11px] leading-relaxed">Click "+ Add Task", use column quick '+' buttons, or shift tasks between columns seamlessly.</p>
+</div>
+</div>
+<div class="relative">
+<button aria-label="Notifications" class="w-9 h-9 rounded-full bg-white border border-slate-200/80 flex items-center justify-center text-slate-500 hover:text-slate-700 shadow-sm transition relative" id="btn-notifications" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24"><path d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span class="absolute top-2 right-2 w-1.5 h-1.5 bg-red-400 rounded-full" id="notif-badge"></span>
+</button>
+<div class="hidden absolute right-0 top-11 w-56 bg-white rounded-xl shadow-lg border border-slate-100 p-2.5 z-50 text-xs text-slate-600" id="menu-notifications">
+<div class="font-bold text-slate-800 mb-1 flex items-center justify-between"><span>Notifications</span><span class="text-[10px] text-slate-400">1 new</span></div>
+<p class="text-[11px] text-slate-500 bg-slate-50 p-2 rounded-lg">Sprint weekly review scheduled for 10:30 today.</p>
+</div>
+</div>
+</div>
+</header>
+<!-- END: TopHeader -->
+<!-- BEGIN: TeamCardsRow -->
+<section aria-label="Team Overview Cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Card 1: Assignments (Purple) -->
+<div class="bg-[#b388ff] text-white rounded-2xl pt-3.5 px-4 pb-2.5 shadow-sm flex flex-col justify-between relative overflow-hidden" data-cat="Assignments">
+<div>
+<div class="flex items-center justify-between mb-2.5">
+<div class="flex items-center gap-1.5">
+<span class="w-6 h-6 rounded-full border-2 border-dashed border-white/60 text-white/80 text-[10px] font-bold flex items-center justify-center">+</span>
+<span class="text-[10px] text-white/80 font-medium">3 members</span>
+</div>
+<span class="cat-hrs text-[10px] font-semibold bg-white/20 px-2 py-0.5 rounded-full">3.5 hrs</span>
+</div>
+<h2 class="font-semibold text-sm tracking-tight text-white mb-0.5">Assignments</h2>
+<p class="cat-sub text-[11px] text-purple-100/90 truncate">1 active task • 1 timer set</p>
+</div>
+<div class="mt-4 pt-1 w-full flex items-center gap-2">
+<div class="h-1 bg-white/25 rounded-full w-full overflow-hidden">
+<div class="cat-progress-bar h-full bg-white rounded-full transition-all duration-300" style="width: 25%"></div>
+</div>
+<span class="cat-progress-text text-[9px] text-white/70 font-medium shrink-0">25%</span>
+</div>
+</div>
+<!-- Card 2: Team Projects (Blue) -->
+<div class="bg-[#6b9dfa] text-white rounded-2xl pt-3.5 px-4 pb-2.5 shadow-sm flex flex-col justify-between relative overflow-hidden" data-cat="Team Projects">
+<div>
+<div class="flex items-center justify-between mb-2.5">
+<div class="flex items-center gap-1.5">
+<span class="w-6 h-6 rounded-full border-2 border-dashed border-white/60 text-white/80 text-[10px] font-bold flex items-center justify-center">+</span>
+<span class="text-[10px] text-white/80 font-medium">5 members</span>
+</div>
+<span class="cat-hrs text-[10px] font-semibold bg-white/20 px-2 py-0.5 rounded-full">4.0 hrs</span>
+</div>
+<h2 class="font-semibold text-sm tracking-tight text-white mb-0.5">Team Projects</h2>
+<p class="cat-sub text-[11px] text-blue-100/90 truncate">1 active task • Running</p>
+</div>
+<div class="mt-4 pt-1 w-full flex items-center gap-2">
+<div class="h-1 bg-white/25 rounded-full w-full overflow-hidden">
+<div class="cat-progress-bar h-full bg-white rounded-full transition-all duration-300" style="width: 50%"></div>
+</div>
+<span class="cat-progress-text text-[9px] text-white/70 font-medium shrink-0">50%</span>
+</div>
+</div>
+<!-- Card 3: Personal Goal (Yellow) -->
+<div class="bg-[#fbc44f] text-white rounded-2xl pt-3.5 px-4 pb-2.5 shadow-sm flex flex-col justify-between relative overflow-hidden" data-cat="Personal Goal">
+<div>
+<div class="flex items-center justify-between mb-2.5">
+<div class="flex items-center gap-1.5">
+<span class="w-6 h-6 rounded-full border-2 border-dashed border-white/60 text-white/80 text-[10px] font-bold flex items-center justify-center">+</span>
+<span class="text-[10px] text-white/80 font-medium">Self</span>
+</div>
+<span class="cat-hrs text-[10px] font-semibold bg-white/20 px-2 py-0.5 rounded-full">1.5 hrs</span>
+</div>
+<h2 class="font-semibold text-sm tracking-tight text-white mb-0.5">Personal Goal</h2>
+<p class="cat-sub text-[11px] text-yellow-100/90 truncate">1 under review</p>
+</div>
+<div class="mt-4 pt-1 w-full flex items-center gap-2">
+<div class="h-1 bg-white/25 rounded-full w-full overflow-hidden">
+<div class="cat-progress-bar h-full bg-white rounded-full transition-all duration-300" style="width: 75%"></div>
+</div>
+<span class="cat-progress-text text-[9px] text-white/70 font-medium shrink-0">75%</span>
+</div>
+</div>
+<!-- Card 4: Courses (Pink) -->
+<div class="bg-[#f97bb3] text-white rounded-2xl pt-3.5 px-4 pb-2.5 shadow-sm flex flex-col justify-between relative overflow-hidden" data-cat="Courses">
+<div>
+<div class="flex items-center justify-between mb-2.5">
+<div class="flex items-center gap-1.5">
+<span class="w-6 h-6 rounded-full border-2 border-dashed border-white/60 text-white/80 text-[10px] font-bold flex items-center justify-center">+</span>
+<span class="text-[10px] text-white/80 font-medium">2 enrolled</span>
+</div>
+<span class="cat-hrs text-[10px] font-semibold bg-white/20 px-2 py-0.5 rounded-full">2.0 hrs</span>
+</div>
+<h2 class="font-semibold text-sm tracking-tight text-white mb-0.5">Courses</h2>
+<p class="cat-sub text-[11px] text-pink-100/90 truncate">1 completed sprint</p>
+</div>
+<div class="mt-4 pt-1 w-full flex items-center gap-2">
+<div class="h-1 bg-white/25 rounded-full w-full overflow-hidden">
+<div class="cat-progress-bar h-full bg-white rounded-full transition-all duration-300" style="width: 100%"></div>
+</div>
+<span class="cat-progress-text text-[9px] text-white/70 font-medium shrink-0">100%</span>
+</div>
+</div>
+</section>
+<!-- END: TeamCardsRow -->
+<!-- BEGIN: KanbanBoardSection -->
+<section aria-label="Workflow Status Columns" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Column 1: Draft -->
+<div class="kanban-col bg-white rounded-2xl p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between min-h-[260px] transition-all" data-stage="Draft">
+<div class="col-main-content">
+<div class="flex items-center justify-between pb-3 relative">
+<div class="flex items-center gap-1.5">
+<span class="font-semibold text-slate-800 text-sm">Draft</span>
+<span class="badge-count text-[10px] text-slate-600 bg-slate-100 font-semibold px-2 py-0.5 rounded-full transition">1</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="btn-quick-add w-6 h-6 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center transition" data-stage="Draft" title="Add task to Draft" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+<div class="relative">
+<button aria-label="Draft options" class="text-slate-400 hover:text-slate-600 options-btn w-6 h-6 rounded-full flex items-center justify-center hover:bg-slate-50 transition" type="button">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 20 20"><circle cx="10" cy="4" r="1.5"></circle><circle cx="10" cy="10" r="1.5"></circle><circle cx="10" cy="16" r="1.5"></circle></svg>
+</button>
+<div class="kanban-dropdown-menu hidden absolute right-0 top-7 w-32 bg-white rounded-xl shadow-lg border border-slate-100 py-1.5 z-40 text-[11px] text-slate-600">
+<button class="menu-action-sort w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-1.5" type="button"><span>⇅</span> Sort A-Z</button>
+<button class="menu-action-clear w-full text-left px-3 py-1.5 hover:bg-red-50 text-red-600 flex items-center gap-1.5" type="button"><span>🗑</span> Clear All</button>
+<button class="menu-action-collapse w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-1.5" type="button"><span>◱</span> Collapse</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Task List Drop Area -->
+<div class="kanban-task-list flex flex-col gap-2 mb-2 min-h-[40px] transition-all"></div>
+<!-- Column Empty / Prompt Placeholder -->
+<button class="btn-open-kanban w-full border-2 border-dashed border-slate-200/80 hover:border-slate-400 rounded-xl p-3 flex flex-col items-center justify-center gap-1 text-center group transition my-1" data-stage="Draft" type="button">
+<span class="w-6 h-6 rounded-full bg-slate-100 group-hover:bg-[#1F1F1F] group-hover:text-white text-slate-500 flex items-center justify-center text-xs font-bold transition">+</span>
+<span class="empty-col-title text-xs font-medium text-slate-600">Add to Draft</span>
+<span class="empty-col-sub text-[10px] text-slate-400">Click to create new draft</span>
+</button>
+</div>
+<div class="col-footer flex items-center justify-between pt-3 mt-2 border-t border-slate-100 text-slate-400 text-xs">
+<span class="footer-stat text-[10px]">1 item saved</span>
+<svg class="w-3.5 h-3.5 fill-slate-300 text-slate-300" viewbox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+</div>
+</div>
+<!-- Column 2: In Progress -->
+<div class="kanban-col bg-white rounded-2xl p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between min-h-[260px] transition-all" data-stage="In Progress">
+<div class="col-main-content">
+<div class="flex items-center justify-between pb-3 relative">
+<div class="flex items-center gap-1.5">
+<span class="font-semibold text-slate-800 text-sm">In Progress</span>
+<span class="badge-count text-[10px] text-slate-600 bg-slate-100 font-semibold px-2 py-0.5 rounded-full transition">1</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="btn-quick-add w-6 h-6 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center transition" data-stage="In Progress" title="Add task to In Progress" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+<div class="relative">
+<button aria-label="In Progress options" class="text-slate-400 hover:text-slate-600 options-btn w-6 h-6 rounded-full flex items-center justify-center hover:bg-slate-50 transition" type="button">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 20 20"><circle cx="10" cy="4" r="1.5"></circle><circle cx="10" cy="10" r="1.5"></circle><circle cx="10" cy="16" r="1.5"></circle></svg>
+</button>
+<div class="kanban-dropdown-menu hidden absolute right-0 top-7 w-32 bg-white rounded-xl shadow-lg border border-slate-100 py-1.5 z-40 text-[11px] text-slate-600">
+<button class="menu-action-sort w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-1.5" type="button"><span>⇅</span> Sort A-Z</button>
+<button class="menu-action-clear w-full text-left px-3 py-1.5 hover:bg-red-50 text-red-600 flex items-center gap-1.5" type="button"><span>🗑</span> Clear All</button>
+<button class="menu-action-collapse w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-1.5" type="button"><span>◱</span> Collapse</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Task List Drop Area -->
+<div class="kanban-task-list flex flex-col gap-2 mb-2 min-h-[40px] transition-all"></div>
+<button class="btn-open-kanban w-full border-2 border-dashed border-slate-200/80 hover:border-slate-400 rounded-xl p-3 flex flex-col items-center justify-center gap-1 text-center group transition my-1" data-stage="In Progress" type="button">
+<span class="w-6 h-6 rounded-full bg-slate-100 group-hover:bg-[#1F1F1F] group-hover:text-white text-slate-500 flex items-center justify-center text-xs font-bold transition">+</span>
+<span class="empty-col-title text-xs font-medium text-slate-600">Add to In Progress</span>
+<span class="empty-col-sub text-[10px] text-slate-400">Drag here or start timer</span>
+</button>
+</div>
+<div class="col-footer flex items-center justify-between pt-3 mt-2 border-t border-slate-100 text-slate-400 text-xs">
+<span class="footer-stat text-[10px]">1 active timer</span>
+<svg class="w-3.5 h-3.5 fill-slate-300 text-slate-300" viewbox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+</div>
+</div>
+<!-- Column 3: Editing -->
+<div class="kanban-col bg-white rounded-2xl p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between min-h-[260px] transition-all" data-stage="Editing">
+<div class="col-main-content">
+<div class="flex items-center justify-between pb-3 relative">
+<div class="flex items-center gap-1.5">
+<span class="font-semibold text-slate-800 text-sm">Editing</span>
+<span class="badge-count text-[10px] text-slate-600 bg-slate-100 font-semibold px-2 py-0.5 rounded-full transition">1</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="btn-quick-add w-6 h-6 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center transition" data-stage="Editing" title="Add task to Editing" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+<div class="relative">
+<button aria-label="Editing options" class="text-slate-400 hover:text-slate-600 options-btn w-6 h-6 rounded-full flex items-center justify-center hover:bg-slate-50 transition" type="button">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 20 20"><circle cx="10" cy="4" r="1.5"></circle><circle cx="10" cy="10" r="1.5"></circle><circle cx="10" cy="16" r="1.5"></circle></svg>
+</button>
+<div class="kanban-dropdown-menu hidden absolute right-0 top-7 w-32 bg-white rounded-xl shadow-lg border border-slate-100 py-1.5 z-40 text-[11px] text-slate-600">
+<button class="menu-action-sort w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-1.5" type="button"><span>⇅</span> Sort A-Z</button>
+<button class="menu-action-clear w-full text-left px-3 py-1.5 hover:bg-red-50 text-red-600 flex items-center gap-1.5" type="button"><span>🗑</span> Clear All</button>
+<button class="menu-action-collapse w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-1.5" type="button"><span>◱</span> Collapse</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Task List Drop Area -->
+<div class="kanban-task-list flex flex-col gap-2 mb-2 min-h-[40px] transition-all"></div>
+<button class="btn-open-kanban w-full border-2 border-dashed border-slate-200/80 hover:border-slate-400 rounded-xl p-3 flex flex-col items-center justify-center gap-1 text-center group transition my-1" data-stage="Editing" type="button">
+<span class="w-6 h-6 rounded-full bg-slate-100 group-hover:bg-[#1F1F1F] group-hover:text-white text-slate-500 flex items-center justify-center text-xs font-bold transition">+</span>
+<span class="empty-col-title text-xs font-medium text-slate-600">Add to Editing</span>
+<span class="empty-col-sub text-[10px] text-slate-400">Awaiting review</span>
+</button>
+</div>
+<div class="col-footer flex items-center justify-between pt-3 mt-2 border-t border-slate-100 text-slate-400 text-xs">
+<span class="footer-stat text-[10px]">1 under review</span>
+<svg class="w-3.5 h-3.5 fill-slate-300 text-slate-300" viewbox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+</div>
+</div>
+<!-- Column 4: Done -->
+<div class="kanban-col bg-white rounded-2xl p-4 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between min-h-[260px] transition-all" data-stage="Done">
+<div class="col-main-content">
+<div class="flex items-center justify-between pb-3 relative">
+<div class="flex items-center gap-1.5">
+<span class="font-semibold text-slate-800 text-sm">Done</span>
+<span class="badge-count text-[10px] text-slate-600 bg-slate-100 font-semibold px-2 py-0.5 rounded-full transition">1</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="btn-quick-add w-6 h-6 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center transition" data-stage="Done" title="Add task to Done" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+<div class="relative">
+<button aria-label="Done options" class="text-slate-400 hover:text-slate-600 options-btn w-6 h-6 rounded-full flex items-center justify-center hover:bg-slate-50 transition" type="button">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 20 20"><circle cx="10" cy="4" r="1.5"></circle><circle cx="10" cy="10" r="1.5"></circle><circle cx="10" cy="16" r="1.5"></circle></svg>
+</button>
+<div class="kanban-dropdown-menu hidden absolute right-0 top-7 w-32 bg-white rounded-xl shadow-lg border border-slate-100 py-1.5 z-40 text-[11px] text-slate-600">
+<button class="menu-action-sort w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-1.5" type="button"><span>⇅</span> Sort A-Z</button>
+<button class="menu-action-clear w-full text-left px-3 py-1.5 hover:bg-red-50 text-red-600 flex items-center gap-1.5" type="button"><span>🗑</span> Clear All</button>
+<button class="menu-action-collapse w-full text-left px-3 py-1.5 hover:bg-slate-50 flex items-center gap-1.5" type="button"><span>◱</span> Collapse</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Task List Drop Area -->
+<div class="kanban-task-list flex flex-col gap-2 mb-2 min-h-[40px] transition-all"></div>
+<button class="btn-open-kanban w-full border-2 border-dashed border-slate-200/80 hover:border-slate-400 rounded-xl p-3 flex flex-col items-center justify-center gap-1 text-center group transition my-1" data-stage="Done" type="button">
+<span class="w-6 h-6 rounded-full bg-slate-100 group-hover:bg-[#1F1F1F] group-hover:text-white text-slate-400 flex items-center justify-center text-xs font-bold transition">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M4.5 12.75l6 6 9-13.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</span>
+<span class="empty-col-title text-xs font-medium text-slate-600">Add Completed</span>
+<span class="empty-col-sub text-[10px] text-slate-400">Archive completed items</span>
+</button>
+</div>
+<div class="col-footer flex items-center justify-between pt-3 mt-2 border-t border-slate-100 text-slate-400 text-xs">
+<span class="footer-stat text-[10px]">100% sprint progress</span>
+<span class="w-3.5 h-3.5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[8px] font-bold">✓</span>
+</div>
+</div>
+</section>
+<!-- END: KanbanBoardSection -->
+<!-- BEGIN: TaskManagementScheduleSection -->
+<section aria-label="Task Management Weekly Schedule" class="mt-2">
+<!-- Section Header & View Toggles -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+<h2 class="text-lg md:text-xl font-bold text-slate-800 tracking-tight">Task Management</h2>
+<div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-full self-start sm:self-auto"><button class="view-toggle-btn px-4 py-1 text-xs font-medium text-slate-600 hover:text-slate-900 rounded-full transition" data-view="Month" type="button">Month</button><button class="view-toggle-btn px-4 py-1 text-xs font-medium text-slate-600 hover:text-slate-900 rounded-full transition" data-view="Day" type="button">Day</button><button class="view-toggle-btn px-5 py-1 text-xs font-medium text-white bg-[#1F1F1F] rounded-full shadow-sm" data-view="Week" type="button">Week</button><button aria-label="Options" class="px-2.5 py-1 text-xs font-medium text-slate-400 hover:text-slate-700 rounded-full" id="btn-view-more" type="button">•••</button></div>
+</div>
+<!-- Schedule Table / Calendar Grid Container -->
+<div class="bg-white rounded-3xl p-4 md:p-6 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.03)] border border-slate-100 overflow-x-auto">
+<div class="min-w-[920px] relative">
+<!-- Column Headers -->
+<div class="grid grid-cols-[60px_repeat(7,1fr)] gap-2 border-b border-slate-100 pb-3 items-center text-center">
+<div></div> <!-- Spacer for time axis -->
+<div class="flex flex-col">
+<span class="text-[11px] font-semibold text-slate-600">Monday</span>
+<span class="text-[10px] text-slate-400">09.08.2025</span>
+</div>
+<!-- Highlighted Active Tuesday Column Header -->
+<div class="flex flex-col py-1 px-2 rounded-xl bg-slate-100/90 shadow-sm border border-slate-200/50">
+<span class="text-[11px] font-bold text-slate-800">Tuesday</span>
+<span class="text-[10px] font-medium text-slate-500">10.08.2025</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[11px] font-semibold text-slate-600">Wednesday</span>
+<span class="text-[10px] text-slate-400">11.08.2025</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[11px] font-semibold text-slate-600">Thursday</span>
+<span class="text-[10px] text-slate-400">12.08.2025</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[11px] font-semibold text-slate-600">Friday</span>
+<span class="text-[10px] text-slate-400">13.08.2025</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[11px] font-semibold text-slate-600">Saturday</span>
+<span class="text-[10px] text-slate-400">14.08.2025</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[11px] font-semibold text-slate-600">Sunday</span>
+<span class="text-[10px] text-slate-400">15.08.2025</span>
+</div>
+</div>
+<!-- Schedule Grid Area with Time Rows -->
+<div class="relative grid grid-cols-[60px_repeat(7,1fr)] gap-2 pt-2"><!-- Tuesday Vertical Column Highlight Overlay -->
+<div class="absolute left-[calc(60px+1*(100%-60px)/7)] w-[calc((100%-60px)/7)] top-0 bottom-0 bg-slate-50/80 rounded-2xl pointer-events-none -z-0 border-x border-slate-100/60"></div>
+<!-- Current Time Indicator Line (09:45) -->
+<div class="absolute left-[60px] right-0 top-[175px] flex items-center z-20 pointer-events-none">
+<div class="w-2.5 h-2.5 rounded-full bg-[#527cf6] -ml-1 border-2 border-white shadow"></div>
+<div class="w-full border-t-2 border-[#527cf6]/80"></div>
+</div>
+<!-- Time Axis (Left side) -->
+<div class="flex flex-col text-[11px] font-medium text-slate-500 select-none py-1">
+<div class="h-[52px]">08:30</div>
+<div class="h-[52px]">09:00</div>
+<div class="h-[52px]">09:30</div>
+<div class="h-[52px]">09:45</div>
+<div class="h-[52px]">10:30</div>
+<div class="h-[52px]">11:00</div>
+</div>
+<!-- Monday Column -->
+<div class="calendar-day-col relative h-[320px] rounded-xl border border-dashed border-slate-200/50 hover:border-[#527cf6]/60 transition flex flex-col justify-start p-1.5 gap-1.5 cursor-pointer" data-day="Monday"><div class="text-[10px] text-slate-300 font-medium select-none text-center py-1 hover:text-slate-500">+ Add</div><div class="calendar-tasks flex flex-col gap-1 w-full"></div></div>
+<!-- Tuesday Column -->
+<div class="calendar-day-col relative h-[320px] z-10 rounded-xl border border-dashed border-[#527cf6]/40 hover:border-[#527cf6]/80 transition flex flex-col justify-start p-1.5 gap-1.5 bg-[#527cf6]/[0.02] cursor-pointer" data-day="Tuesday"><div class="text-[10px] text-[#527cf6] font-medium text-center leading-tight py-1">+ Schedule</div><div class="calendar-tasks flex flex-col gap-1 w-full"></div></div>
+<!-- Wednesday Column -->
+<div class="calendar-day-col relative h-[320px] rounded-xl border border-dashed border-slate-200/50 hover:border-[#527cf6]/60 transition flex flex-col justify-start p-1.5 gap-1.5 cursor-pointer" data-day="Wednesday"><div class="text-[10px] text-slate-300 font-medium select-none text-center py-1 hover:text-slate-500">+ Add</div><div class="calendar-tasks flex flex-col gap-1 w-full"></div></div>
+<!-- Thursday Column -->
+<div class="calendar-day-col relative h-[320px] rounded-xl border border-dashed border-slate-200/50 hover:border-[#527cf6]/60 transition flex flex-col justify-start p-1.5 gap-1.5 cursor-pointer" data-day="Thursday"><div class="text-[10px] text-slate-300 font-medium select-none text-center py-1 hover:text-slate-500">+ Add</div><div class="calendar-tasks flex flex-col gap-1 w-full"></div></div>
+<!-- Friday Column -->
+<div class="calendar-day-col relative h-[320px] rounded-xl border border-dashed border-slate-200/50 hover:border-[#527cf6]/60 transition flex flex-col justify-start p-1.5 gap-1.5 cursor-pointer" data-day="Friday"><div class="text-[10px] text-slate-300 font-medium select-none text-center py-1 hover:text-slate-500">+ Add</div><div class="calendar-tasks flex flex-col gap-1 w-full"></div></div>
+<!-- Saturday Column -->
+<div class="calendar-day-col relative h-[320px] rounded-xl border border-dashed border-slate-200/50 hover:border-[#527cf6]/60 transition flex flex-col justify-start p-1.5 gap-1.5 cursor-pointer" data-day="Saturday"><div class="text-[10px] text-slate-300 font-medium select-none text-center py-1 hover:text-slate-500">+ Add</div><div class="calendar-tasks flex flex-col gap-1 w-full"></div></div>
+<!-- Sunday Column -->
+<div class="calendar-day-col relative h-[320px] rounded-xl border border-dashed border-slate-200/50 hover:border-[#527cf6]/60 transition flex flex-col justify-start p-1.5 gap-1.5 cursor-pointer" data-day="Sunday"><div class="text-[10px] text-slate-300 font-medium select-none text-center py-1 hover:text-slate-500">+ Add</div><div class="calendar-tasks flex flex-col gap-1 w-full"></div></div></div>
+</div>
+</div>
+</section>
+<!-- END: TaskManagementScheduleSection -->
+</div>
+<!-- END: DashboardWrapper -->
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- SECTION 4: CALENDAR SCHEDULE & PLANNER VIEW             -->
+  <!-- ======================================================== -->
+  <section id="planner-section" class="hidden w-full flex-1 flex flex-col items-center justify-start px-3 md:px-6 py-4 md:py-6 transition-opacity duration-500 opacity-0 pointer-events-none" data-purpose="planner-section">
+    <!-- Main Planner Wrapper -->
+    <div class="w-full max-w-[950px] bg-white rounded-3xl p-4 sm:p-7 shadow-sm border border-slate-100 flex flex-col relative" data-purpose="calendar-main">
+      
+      <!-- Header Section -->
+      <header class="px-2 sm:px-4 pt-2 pb-3 flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 relative z-30" data-purpose="calendar-header">
+        <!-- Title showing current selected date -->
+        <div class="flex items-center gap-3">
+          <h2 class="text-2xl sm:text-3xl font-normal tracking-tight text-[#1F1F1F] transition-all cursor-pointer hover:opacity-80" data-purpose="calendar-heading" id="calendar-heading" title="Click to view today">
+            Saturday, Nov 19th
+          </h2>
+          <button class="text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded border border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400 transition-colors cursor-pointer" id="today-shortcut-badge" onclick="selectDate('19', 'Saturday, Nov 19th', true)">
+            Today
+          </button>
+        </div>
+        <!-- Navigation tabs and actions -->
+        <nav aria-label="Calendar views" class="flex items-center space-x-6 mt-4 sm:mt-0 text-[11px] font-semibold tracking-wider text-slate-400 relative">
+          <!-- View Buttons -->
+          <button class="view-btn relative py-1 cursor-pointer hover:text-slate-700 transition-colors uppercase text-[#1F1F1F]" id="view-tab-day" onclick="switchView('day')" type="button">
+            <span>DAY</span>
+            <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-7 h-[2px] bg-[#1F1F1F] rounded-full transition-all duration-300" id="view-indicator"></div>
+          </button>
+          <button class="view-btn py-1 hover:text-slate-700 transition-colors uppercase cursor-pointer" id="view-tab-week" onclick="switchView('week')" type="button">Week</button>
+          <button class="view-btn py-1 hover:text-slate-700 transition-colors uppercase cursor-pointer" id="view-tab-month" onclick="switchView('month')" type="button">Month</button>
+          <button class="view-btn py-1 hover:text-slate-700 transition-colors uppercase cursor-pointer" id="view-tab-year" onclick="switchView('year')" type="button">Year</button>
+          <!-- More actions menu button -->
+          <div class="relative">
+            <button aria-label="More options" class="text-slate-400 hover:text-slate-700 text-lg leading-none tracking-widest pl-1 py-1 focus:outline-none transition-colors cursor-pointer" id="more-menu-btn" onclick="toggleMenu()" type="button">
+              ···
+            </button>
+            <!-- More Actions Dropdown -->
+            <div class="hidden absolute right-0 top-7 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-1.5 text-xs text-slate-700 z-50" id="more-menu-dropdown">
+              <button class="w-full text-left px-3.5 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer" onclick="selectDate('19', 'Saturday, Nov 19th', true); toggleMenu();">
+                <span class="material-symbols-outlined text-[15px] text-slate-500">today</span> Jump to Today
+              </button>
+              <button class="w-full text-left px-3.5 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer" onclick="triggerAiSchedule(); toggleMenu();">
+                <span class="material-symbols-outlined text-[15px] text-cyan-600">auto_awesome</span> Smart AI Schedule
+              </button>
+              <button class="w-full text-left px-3.5 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer" onclick="showToast('Calendar exported (.ics)'); toggleMenu();">
+                <span class="material-symbols-outlined text-[15px] text-slate-500">file_download</span> Export Calendar
+              </button>
+              <button class="w-full text-left px-3.5 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer" onclick="showToast('Categories filtered: Showing All'); toggleMenu();">
+                <span class="material-symbols-outlined text-[15px] text-slate-500">filter_alt</span> Filter Categories
+              </button>
+              <div class="border-t border-slate-100 my-1"></div>
+              <button class="w-full text-left px-3.5 py-2 hover:bg-slate-50 flex items-center gap-2 cursor-pointer" onclick="showToast('Settings opened'); toggleMenu();">
+                <span class="material-symbols-outlined text-[15px] text-slate-500">settings</span> Settings
+              </button>
+            </div>
+          </div>
+        </nav>
+      </header>
+
+      <!-- View notification banner -->
+      <div class="hidden bg-slate-50 border-b border-slate-100 px-4 py-1.5 text-[11px] text-slate-500 flex items-center justify-between" id="view-mode-banner">
+        <span id="view-mode-text">Currently viewing Day schedule for Nov 19, 2023</span>
+        <button class="font-semibold text-slate-700 underline hover:text-black cursor-pointer" onclick="switchView('month')">Back to Month Grid</button>
+      </div>
+
+      <!-- Calendar Month Days Grid -->
+      <section class="flex-1 flex flex-col relative mt-2" data-purpose="calendar-grid-view">
+        <!-- Day Headers Row -->
+        <div class="grid grid-cols-7 border-b border-slate-100 text-[13px] font-medium text-slate-600">
+          <div class="py-3 px-3">Mon</div>
+          <div class="py-3 px-3">Tue</div>
+          <div class="py-3 px-3">Wed</div>
+          <div class="py-3 px-3">Thu</div>
+          <div class="py-3 px-3">Fri</div>
+          <div class="py-3 px-3">Sat</div>
+          <div class="py-3 px-3">Sun</div>
+        </div>
+
+        <!-- Calendar Month Days Body -->
+        <div class="grid grid-cols-7 flex-1 border-b border-slate-100 relative" id="calendar-grid-body">
+          <!-- ROW 1 -->
+          <div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="30" onclick="selectDate('30', 'Monday, Oct 30th')">
+            <div class="space-y-1"></div>
+            <div class="flex justify-end text-xs font-medium text-slate-300">30</div>
+          </div>
+          <div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="31" onclick="selectDate('31', 'Tuesday, Oct 31st')">
+            <div class="space-y-1">
+              <div class="bg-[#2D2E32] hover:bg-black text-slate-300 hover:text-white text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors shadow-sm" onclick="event.stopPropagation(); openEventDrawer('Dinner with Strategy Team', '07:30 PM - 09:00 PM', 'Oct 31', 'Social &amp; Dinner', 'Table booked for 4 at Bistro Nova.')">Dinner with Str...</div>
+              <div class="bg-[#2D2E32] hover:bg-black text-slate-300 hover:text-white text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors shadow-sm" onclick="event.stopPropagation(); openEventDrawer('Dinner with Str (Follow-up)', '09:00 PM - 10:00 PM', 'Oct 31', 'Social', 'Drinks with partners.')">Dinner with Str...</div>
+            </div>
+            <div class="flex items-center justify-between text-xs text-slate-400 mt-2">
+              <span class="flex items-center gap-1 text-[10px] text-slate-400">
+                <svg class="w-3 h-3 fill-slate-400" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"></path></svg> 03
+              </span>
+              <span class="text-slate-300 font-medium">31</span>
+            </div>
+          </div>
+          <div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between bg-white" data-day="01" onclick="selectDate('01', 'Wednesday, Nov 1st')">
+            <div class="space-y-1"></div>
+            <div class="flex justify-end text-xs font-semibold text-slate-600">01</div>
+          </div>
+          <div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="02" onclick="selectDate('02', 'Thursday, Nov 2nd')">
+            <div class="space-y-1">
+              <div class="bg-[#1F1F1F] hover:bg-black text-white text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors shadow-sm" onclick="event.stopPropagation(); openEventDrawer('Dinner with Str...', '07:00 PM - 08:30 PM', 'Nov 02', 'Dinner', 'Strategy planning over dinner.')">Dinner with Str...</div>
+              <div class="bg-[#1F1F1F] hover:bg-black text-white text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors shadow-sm" onclick="event.stopPropagation(); openEventDrawer('Meeting with client...', '02:00 PM - 03:00 PM', 'Nov 02', 'Client Work', 'Quarterly roadmap sync via Google Meet.')">Meeting with cli...</div>
+            </div>
+            <div class="flex items-center justify-between text-xs text-slate-500 mt-2">
+              <span class="flex items-center gap-1 text-[10px] text-slate-400">
+                <svg class="w-3 h-3 fill-slate-300" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"></path></svg> 3
+              </span>
+              <span class="font-semibold text-slate-600">02</span>
+            </div>
+          </div>
+          <div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="03" onclick="selectDate('03', 'Friday, Nov 3rd')">
+            <div class="space-y-1"></div>
+            <div class="flex justify-end text-xs font-semibold text-slate-600">03</div>
+          </div>
+          <div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="04" onclick="selectDate('04', 'Saturday, Nov 4th')">
+            <div class="space-y-1">
+              <div class="bg-[#1F1F1F] hover:bg-black text-white text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors shadow-sm" onclick="event.stopPropagation(); openEventDrawer('Dinner with Str...', '08:00 PM - 09:30 PM', 'Nov 04', 'Social', 'Weekend catchup.')">Dinner with Str...</div>
+            </div>
+            <div class="flex items-center justify-between text-xs text-slate-500 mt-2">
+              <span class="flex items-center gap-1 text-[10px] text-slate-400">
+                <svg class="w-3 h-3 fill-slate-300" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"></path></svg> 1
+              </span>
+              <span class="font-semibold text-slate-600">04</span>
+            </div>
+          </div>
+          <div class="cal-cell cursor-pointer border-b border-slate-100 p-2 flex flex-col justify-between" data-day="05" onclick="selectDate('05', 'Sunday, Nov 5th')">
+            <div class="space-y-1"></div>
+            <div class="flex justify-end text-xs font-semibold text-slate-600">05</div>
+          </div>
+
+          <!-- ROW 2 -->
+          <div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="06" onclick="selectDate('06', 'Monday, Nov 6th')">
+            <div class="space-y-1"></div>
+            <div class="flex justify-end text-xs font-semibold text-slate-600">06</div>
+          </div>
+          <div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="07" onclick="selectDate('07', 'Tuesday, Nov 7th')">
+            <div class="space-y-1"></div>
+            <div class="flex justify-end text-xs font-semibold text-slate-600">07</div>
+          </div>
+          <!-- Wed 08 - Popover cell -->
+          <div class="cal-cell has-popover border-r border-b border-slate-100 relative cursor-pointer" data-day="08" id="cell-08" onclick="selectDate('08', 'Wednesday, Nov 8th')">
+            <!-- Floating Detail Card -->
+            <div class="absolute -top-24 left-[-1px] right-[-1px] bg-white rounded-md shadow-xl border border-slate-200/80 z-20 flex flex-col justify-between p-2 pb-2.5 h-[236px] transition-all" data-purpose="active-day-card" id="floating-day-popover">
+              <div class="flex items-center justify-between">
+                <div class="text-xs font-semibold text-slate-600" id="popover-top-date">01</div>
+              </div>
+              <div class="space-y-1.5 my-auto" id="popover-events-list">
+                <div class="bg-[#1F1F1F] hover:bg-black cursor-pointer text-white text-[9.5px] px-2 py-1 rounded shadow-sm truncate transition-colors flex items-center justify-between" onclick="event.stopPropagation(); openEventDrawer('Dinner with Str...', '06:00 PM - 07:30 PM', 'Nov 08', 'Dinner', 'Evening table reserved with the strategy partners.')">
+                  <span>Dinner with Str...</span>
+                  <span class="text-[8px] text-slate-400 font-mono">18:00</span>
+                </div>
+                <div class="bg-[#1F1F1F] hover:bg-black cursor-pointer text-white text-[9.5px] px-2 py-1 rounded shadow-sm truncate transition-colors flex items-center justify-between" onclick="event.stopPropagation(); openEventDrawer('Meeting with cli...', '11:00 AM - 12:00 PM', 'Nov 08', 'Work', 'Weekly checkin on product deliverables.')">
+                  <span>Meeting with cli...</span>
+                  <span class="text-[8px] text-slate-400 font-mono">11:00</span>
+                </div>
+                <div class="bg-[#2D2E32] hover:bg-black cursor-pointer text-white text-[9.5px] px-2 py-1 rounded shadow-sm truncate transition-colors flex items-center justify-between" onclick="event.stopPropagation(); openEventDrawer('Work on Brand...', '02:00 PM - 04:00 PM', 'Nov 08', 'Design', 'Refining primary palette, fonts, and style guide.')">
+                  <span>Work on Brand...</span>
+                  <span class="text-[8px] text-slate-400 font-mono">14:00</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-100">
+                <span class="flex items-center gap-1 text-[10px] text-slate-400">
+                  <svg class="w-3 h-3 fill-slate-300" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"></path></svg>
+                  <span id="popover-count">4</span>
+                </span>
+                <span class="font-semibold text-slate-600" id="popover-bottom-date">08</span>
+              </div>
+            </div>
+          </div>
+          <div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="09" onclick="selectDate('09', 'Thursday, Nov 9th')">
+            <div class="space-y-1"></div>
+            <div class="flex justify-end text-xs font-semibold text-slate-600">09</div>
+          </div>
+          <div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="10" onclick="selectDate('10', 'Friday, Nov 10th')">
+            <div class="space-y-1">
+              <div class="bg-[#1F1F1F] hover:bg-black text-white text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors shadow-sm" onclick="event.stopPropagation(); openEventDrawer('Dinner with Str...', '08:00 PM - 09:30 PM', 'Nov 10', 'Dinner', 'Friday team dinner.')">Dinner with Str...</div>
+            </div>
+            <div class="flex items-center justify-between text-xs text-slate-500 mt-2">
+              <span class="flex items-center gap-1 text-[10px] text-slate-400">
+                <svg class="w-3 h-3 fill-slate-300" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"></path></svg> 1
+              </span>
+              <span class="font-semibold text-slate-600">10</span>
+            </div>
+          </div>
+          <div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="11" onclick="selectDate('11', 'Saturday, Nov 11th')">
+            <div class="space-y-1"></div>
+            <div class="flex justify-end text-xs font-semibold text-slate-600">11</div>
+          </div>
+          <div class="cal-cell cursor-pointer border-b border-slate-100 p-2 flex flex-col justify-between" data-day="12" onclick="selectDate('12', 'Sunday, Nov 12th')">
+            <div class="space-y-1"></div>
+            <div class="flex justify-end text-xs font-semibold text-slate-600">12</div>
+          </div>
+
+          <!-- ROW 3 -->
+          <div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="13" onclick="selectDate('13', 'Monday, Nov 13th')">
+            <div class="space-y-1"></div>
+            <div class="flex justify-end text-xs font-semibold text-slate-600">13</div>
+          </div>
+          <div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="14" onclick="selectDate('14', 'Tuesday, Nov 14th')">
+            <div class="space-y-1">
+              <div class="bg-[#1F1F1F] hover:bg-black text-white text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors shadow-sm" onclick="event.stopPropagation(); openEventDrawer('Dinner with Str...', '07:00 PM', 'Nov 14', 'Social', 'Dinner reservation.')">Dinner with Str...</div>
+              <div class="bg-[#1F1F1F] hover:bg-black text-white text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors shadow-sm" onclick="event.stopPropagation(); openEventDrawer('Meeting with cli...', '03:30 PM', 'Nov 14', 'Client', 'Sprint demo review.')">Meeting with cli...</div>
+            </div>
+            <div class="flex items-center justify-between text-xs text-slate-500 mt-2">
+              <span class="flex items-center gap-1 text-[10px] text-slate-400">
+                <svg class="w-3 h-3 fill-slate-300" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"></path></svg> 2
+              </span>
+              <span class="font-semibold text-slate-600">14</span>
+            </div>
+          </div>
+          <div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="15" onclick="selectDate('15', 'Wednesday, Nov 15th')">
+            <div class="space-y-1"></div>
+            <div class="flex justify-end text-xs font-semibold text-slate-600">15</div>
+          </div>
+          <div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="16" onclick="selectDate('16', 'Thursday, Nov 16th')">
+            <div class="space-y-1"></div>
+            <div class="flex justify-end text-xs font-semibold text-slate-600">16</div>
+          </div>
+          <div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="17" onclick="selectDate('17', 'Friday, Nov 17th')">
+            <div class="space-y-1"></div>
+            <div class="flex justify-end text-xs font-semibold text-slate-600">17</div>
+          </div>
+          <div class="cal-cell cursor-pointer border-r border-b border-slate-100 p-2 flex flex-col justify-between" data-day="18" onclick="selectDate('18', 'Saturday, Nov 18th')">
+            <div class="space-y-1">
+              <div class="bg-[#1F1F1F] hover:bg-black text-white text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors shadow-sm" onclick="event.stopPropagation(); openEventDrawer('Dinner with Str...', '08:00 PM', 'Nov 18', 'Dinner', 'Dinner reservation.')">Dinner with Str...</div>
+              <div class="bg-[#1F1F1F] hover:bg-black text-white text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors shadow-sm" onclick="event.stopPropagation(); openEventDrawer('Meeting with cli...', '01:00 PM', 'Nov 18', 'Meeting', 'Design review sync.')">Meeting with cli...</div>
+            </div>
+            <div class="flex items-center justify-between text-xs text-slate-500 mt-2">
+              <span class="flex items-center gap-1 text-[10px] text-slate-400">
+                <svg class="w-3 h-3 fill-slate-300" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"></path></svg> 2
+              </span>
+              <span class="font-semibold text-slate-600">18</span>
+            </div>
+          </div>
+          <div class="cal-cell cursor-pointer border-b border-slate-100 p-2 flex flex-col justify-between ring-1 ring-inset ring-slate-300 bg-slate-50/50" data-day="19" onclick="selectDate('19', 'Saturday, Nov 19th')">
+            <div class="space-y-1">
+              <div class="w-1.5 h-1.5 rounded-full bg-cyan-500 mb-1" title="Current Day"></div>
+            </div>
+            <div class="flex justify-end text-xs font-semibold text-slate-900">19</div>
+          </div>
+
+          <!-- ROW 4 -->
+          <div class="cal-cell cursor-pointer border-r border-slate-100 p-2 flex flex-col justify-between" data-day="20" onclick="selectDate('20', 'Monday, Nov 20th')">
+            <div class="space-y-1"></div>
+            <div class="flex justify-end text-xs font-semibold text-slate-600">20</div>
+          </div>
+          <div class="cal-cell cursor-pointer border-r border-slate-100 p-2 flex flex-col justify-between" data-day="21" onclick="selectDate('21', 'Tuesday, Nov 21st')">
+            <div class="space-y-1"></div>
+            <div class="flex justify-end text-xs font-semibold text-slate-600">21</div>
+          </div>
+          <div class="cal-cell cursor-pointer border-r border-slate-100 p-2 flex flex-col justify-between" data-day="22" onclick="selectDate('22', 'Wednesday, Nov 22nd')">
+            <div class="space-y-1"></div>
+            <div class="flex justify-end text-xs font-semibold text-slate-600">22</div>
+          </div>
+          <div class="cal-cell cursor-pointer border-r border-slate-100 p-2 flex flex-col justify-between" data-day="23" onclick="selectDate('23', 'Thursday, Nov 23rd')">
+            <div class="space-y-1">
+              <div class="bg-[#1F1F1F] hover:bg-black text-white text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors shadow-sm" onclick="event.stopPropagation(); openEventDrawer('Dinner with Str...', '06:00 PM', 'Nov 23', 'Dinner', 'Thanksgiving eve dinner.')">Dinner with Str...</div>
+              <div class="bg-[#1F1F1F] hover:bg-black text-white text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors shadow-sm" onclick="event.stopPropagation(); openEventDrawer('Meeting with cli...', '10:00 AM', 'Nov 23', 'Meeting', 'Project sign-off.')">Meeting with cli...</div>
+              <div class="bg-[#2D2E32] hover:bg-black text-white text-[9px] px-1.5 py-0.5 rounded truncate cursor-pointer transition-colors shadow-sm" onclick="event.stopPropagation(); openEventDrawer('Work on Brand...', '03:00 PM', 'Nov 23', 'Design', 'Styleguide and tokens.')">Work on Brand...</div>
+            </div>
+            <div class="flex items-center justify-between text-xs text-slate-500 mt-2">
+              <span class="flex items-center gap-1 text-[10px] text-slate-400">
+                <svg class="w-3 h-3 fill-slate-300" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"></path></svg> 4
+              </span>
+              <span class="font-semibold text-slate-600">23</span>
+            </div>
+          </div>
+          <div class="cal-cell cursor-pointer border-r border-slate-100 p-2 flex flex-col justify-between" data-day="24" onclick="selectDate('24', 'Friday, Nov 24th')">
+            <div class="space-y-1"></div>
+            <div class="flex justify-end text-xs font-semibold text-slate-600">24</div>
+          </div>
+          <div class="cal-cell cursor-pointer border-r border-slate-100 p-2 flex flex-col justify-between" data-day="25" onclick="selectDate('25', 'Saturday, Nov 25th')">
+            <div class="space-y-1"></div>
+            <div class="flex justify-end text-xs font-semibold text-slate-600">25</div>
+          </div>
+          <div class="cal-cell cursor-pointer p-2 flex flex-col justify-between" data-day="26" onclick="selectDate('26', 'Sunday, Nov 26th')">
+            <div class="space-y-1"></div>
+            <div class="flex justify-end text-xs font-semibold text-slate-600">26</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Floating Action Button for Quick Add -->
+      <div class="absolute bottom-5 right-5 z-30" data-purpose="quick-add-action">
+        <button aria-label="Add new event" class="w-12 h-12 bg-[#1F1F1F] hover:bg-[#141414] text-white rounded-full flex items-center justify-center shadow-lg shadow-black/30 transition-all hover:scale-105 active:scale-95 focus:outline-none cursor-pointer" id="add-event-fab" onclick="openAddEventModal()" type="button">
+          <svg class="w-6 h-6 stroke-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- MODAL: Add New Event -->
+    <div class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden flex items-center justify-center p-4" id="add-event-modal">
+      <div class="bg-white rounded-xl shadow-2xl border border-slate-100 w-full max-w-md p-6 relative transition-all" onclick="event.stopPropagation()">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <h3 class="text-lg font-semibold text-slate-900 tracking-tight flex items-center gap-2">Add New Event</h3>
+          <button class="text-slate-400 hover:text-slate-600 rounded-lg p-1 transition-colors cursor-pointer" onclick="closeAddEventModal()">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+          </button>
+        </div>
+        <form class="mt-4 space-y-4" id="new-event-form" onsubmit="handleCreateEvent(event)">
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1" for="event-title-input">Event Title</label>
+            <input class="w-full text-sm rounded-lg border-slate-200 focus:border-[#1F1F1F] focus:ring-[#1F1F1F] py-2 px-3 placeholder-slate-400" id="event-title-input" placeholder="e.g. Dinner with Design Team" required="" type="text">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1" for="event-date-input">Date</label>
+              <select class="w-full text-sm rounded-lg border-slate-200 focus:border-[#1F1F1F] focus:ring-[#1F1F1F] py-2 px-3" id="event-date-input">
+                <option value="08">Nov 08 (Active Card)</option>
+                <option selected="" value="19">Nov 19 (Saturday)</option>
+                <option value="02">Nov 02</option>
+                <option value="14">Nov 14</option>
+                <option value="18">Nov 18</option>
+                <option value="23">Nov 23</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1" for="event-time-input">Time</label>
+              <input class="w-full text-sm rounded-lg border-slate-200 focus:border-[#1F1F1F] focus:ring-[#1F1F1F] py-2 px-3" id="event-time-input" type="time" value="19:00">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">Category</label>
+            <div class="grid grid-cols-3 gap-2">
+              <label class="flex items-center gap-1.5 p-2 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 text-xs font-medium">
+                <input checked="" class="text-[#1F1F1F] focus:ring-[#1F1F1F]" name="category" type="radio" value="Strategy">
+                <span>Strategy</span>
+              </label>
+              <label class="flex items-center gap-1.5 p-2 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 text-xs font-medium">
+                <input class="text-[#1F1F1F] focus:ring-[#1F1F1F]" name="category" type="radio" value="Client">
+                <span>Client</span>
+              </label>
+              <label class="flex items-center gap-1.5 p-2 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 text-xs font-medium">
+                <input class="text-[#1F1F1F] focus:ring-[#1F1F1F]" name="category" type="radio" value="Brand">
+                <span>Brand</span>
+              </label>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1" for="event-notes-input">Notes (Optional)</label>
+            <textarea class="w-full text-sm rounded-lg border-slate-200 focus:border-[#1F1F1F] focus:ring-[#1F1F1F] py-2 px-3 placeholder-slate-400" id="event-notes-input" placeholder="Add location or agenda details..." rows="2"></textarea>
+          </div>
+          <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+            <button class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer" onclick="closeAddEventModal()" type="button">Cancel</button>
+            <button class="px-4 py-2 text-xs font-semibold bg-[#1F1F1F] hover:bg-black text-white rounded-lg shadow-sm transition-all active:scale-95 cursor-pointer" type="submit">Create Event</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL: Event Detail Drawer / Modal -->
+    <div class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden flex items-center justify-center p-4" id="event-detail-modal">
+      <div class="bg-white rounded-xl shadow-2xl border border-slate-100 w-full max-w-sm p-5 relative" onclick="event.stopPropagation()">
+        <div class="flex items-start justify-between">
+          <div>
+            <span class="inline-block text-[10px] font-mono uppercase tracking-wider bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full mb-1.5" id="detail-category-badge">Social</span>
+            <h4 class="text-base font-semibold text-slate-900 leading-tight" id="detail-title">Dinner with Str...</h4>
+          </div>
+          <button class="text-slate-400 hover:text-slate-600 rounded-lg p-1 cursor-pointer" onclick="closeEventDetailModal()">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+        <div class="my-4 space-y-2.5 text-xs text-slate-600">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[16px] text-slate-400">schedule</span>
+            <span class="font-medium text-slate-800" id="detail-time">07:00 PM - 08:30 PM</span>
+            <span class="text-slate-400" id="detail-date">• Nov 08</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[16px] text-slate-400">group</span>
+            <span>Sarah K., David M., Alex Chen</span>
+          </div>
+          <div class="flex items-start gap-2 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+            <span class="material-symbols-outlined text-[16px] text-slate-400 mt-0.5">notes</span>
+            <p class="text-slate-600" id="detail-notes">Reserved table for team sync and project check-in.</p>
+          </div>
+        </div>
+        <div class="flex items-center justify-between pt-3 border-t border-slate-100 text-xs">
+          <button class="text-rose-600 hover:text-rose-700 font-medium flex items-center gap-1 transition-colors cursor-pointer" onclick="deleteCurrentEvent()">
+            <span class="material-symbols-outlined text-[16px]">delete</span> Delete
+          </button>
+          <div class="flex items-center gap-2">
+            <button class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded font-medium transition-colors cursor-pointer" onclick="showToast('Edit mode enabled for event'); closeEventDetailModal();">Edit</button>
+            <button class="px-3 py-1.5 bg-[#1F1F1F] text-white hover:bg-black rounded font-medium transition-colors cursor-pointer" onclick="closeEventDetailModal()">Done</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: AI Sphere Voice / Assistant Modal -->
+    <div class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden flex items-center justify-center p-4" id="ai-assistant-modal">
+      <div class="bg-white rounded-2xl shadow-2xl border border-slate-100 w-full max-w-sm p-6 relative flex flex-col items-center text-center" onclick="event.stopPropagation()">
+        <button class="absolute top-3.5 right-3.5 text-slate-400 hover:text-slate-600 rounded-lg p-1 transition-colors cursor-pointer" onclick="closeAiAssistantModal()">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+        <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg shadow-cyan-500/30 mb-3.5 sphere-listening" id="sphere-visual">
+          <span class="material-symbols-outlined text-white text-2xl">auto_awesome</span>
+        </div>
+        <span class="inline-block text-[11px] font-semibold text-cyan-600 bg-cyan-50 px-2.5 py-0.5 rounded-full mb-2" id="ai-status-tag">Listening...</span>
+        <h3 class="text-base font-semibold text-slate-800 tracking-tight mb-1">Momo Calendar Optimizer</h3>
+        <p class="text-xs text-slate-500 leading-relaxed max-w-[260px] mb-4" id="ai-prompt-transcript">
+          “Analyzing your schedule and resolving time conflicts...”
+        </p>
+        <div class="flex items-center gap-2 w-full pt-2 border-t border-slate-100">
+          <button class="flex-1 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition cursor-pointer" onclick="closeAiAssistantModal()" type="button">Dismiss</button>
+          <button class="flex-1 py-2 text-xs font-semibold bg-[#1F1F1F] hover:bg-black text-white rounded-xl shadow-sm transition cursor-pointer" onclick="applyAiOptimization()" type="button">Apply AI Schedule</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST Notification -->
+    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#1F1F1F] text-white px-4 py-2.5 rounded-lg shadow-xl text-xs font-medium flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-3 z-50 border border-slate-700" id="toast">
+      <span class="material-symbols-outlined text-[16px] text-cyan-300" id="toast-icon">check_circle</span>
+      <span id="toast-message">Event created successfully!</span>
+    </div>
+
+  </section>
+
+
+  <!-- ========================================== -->
+  <!-- SCRIPTS & INTERACTIVITY                   -->
+  <!-- ========================================== -->
+  <script>
+    // ----------------------------------------------------
+    // Section Navigation: Home Launcher <-> Momo Voice <-> Task Management <-> Planner
+    // ----------------------------------------------------
+    const homeSection = document.getElementById('home-launcher-section');
+    const momoVoiceSection = document.getElementById('momo-voice-section');
+    const taskSection = document.getElementById('task-management-section');
+    const plannerSection = document.getElementById('planner-section');
+    const backBtn = document.getElementById('back-to-home-btn');
+
+    let currentActiveView = 'home'; // 'home' | 'voice' | 'task' | 'planner'
+
+    function openMomoVoice() {
+      currentActiveView = 'voice';
+      if (homeSection) homeSection.classList.add('opacity-0', 'pointer-events-none');
+      if (taskSection) {
+        taskSection.classList.add('opacity-0', 'pointer-events-none');
+        taskSection.classList.add('hidden');
+      }
+      if (plannerSection) {
+        plannerSection.classList.add('opacity-0', 'pointer-events-none');
+        plannerSection.classList.add('hidden');
+      }
+      setTimeout(() => {
+        if (homeSection) homeSection.classList.add('hidden');
+        if (momoVoiceSection) {
+          momoVoiceSection.classList.remove('hidden');
+          void momoVoiceSection.offsetWidth;
+          momoVoiceSection.classList.remove('opacity-0', 'pointer-events-none');
+        }
+        if (backBtn) {
+          backBtn.classList.remove('hidden');
+          backBtn.classList.add('flex');
+        }
+
+        if (!threeInitialized) {
+          initThreeJS();
+        } else {
+          onThreeResize();
+        }
+      }, 200);
+    }
+
+    function openTaskManagement() {
+      currentActiveView = 'task';
+      if (homeSection) homeSection.classList.add('opacity-0', 'pointer-events-none');
+      if (momoVoiceSection) {
+        setState('Idle');
+        momoVoiceSection.classList.add('opacity-0', 'pointer-events-none');
+        momoVoiceSection.classList.add('hidden');
+      }
+      if (plannerSection) {
+        plannerSection.classList.add('opacity-0', 'pointer-events-none');
+        plannerSection.classList.add('hidden');
+      }
+      setTimeout(() => {
+        if (homeSection) homeSection.classList.add('hidden');
+        if (taskSection) {
+          taskSection.classList.remove('hidden');
+          void taskSection.offsetWidth;
+          taskSection.classList.remove('opacity-0', 'pointer-events-none');
+        }
+        if (backBtn) {
+          backBtn.classList.remove('hidden');
+          backBtn.classList.add('flex');
+        }
+        if (window.renderTaskDashboard) {
+          window.renderTaskDashboard();
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 200);
+    }
+
+    function openPlanner() {
+      currentActiveView = 'planner';
+      if (homeSection) homeSection.classList.add('opacity-0', 'pointer-events-none');
+      if (momoVoiceSection) {
+        setState('Idle');
+        momoVoiceSection.classList.add('opacity-0', 'pointer-events-none');
+        momoVoiceSection.classList.add('hidden');
+      }
+      if (taskSection) {
+        taskSection.classList.add('opacity-0', 'pointer-events-none');
+        taskSection.classList.add('hidden');
+      }
+      setTimeout(() => {
+        if (homeSection) homeSection.classList.add('hidden');
+        if (plannerSection) {
+          plannerSection.classList.remove('hidden');
+          void plannerSection.offsetWidth;
+          plannerSection.classList.remove('opacity-0', 'pointer-events-none');
+        }
+        if (backBtn) {
+          backBtn.classList.remove('hidden');
+          backBtn.classList.add('flex');
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 200);
+    }
+
+    function goHome() {
+      currentActiveView = 'home';
+      // Reset voice states if open
+      setState('Idle');
+      if (momoVoiceSection) {
+        momoVoiceSection.classList.add('opacity-0', 'pointer-events-none');
+      }
+      if (taskSection) {
+        taskSection.classList.add('opacity-0', 'pointer-events-none');
+      }
+      if (plannerSection) {
+        plannerSection.classList.add('opacity-0', 'pointer-events-none');
+      }
+      if (backBtn) {
+        backBtn.classList.remove('flex');
+        backBtn.classList.add('hidden');
+      }
+      setTimeout(() => {
+        if (momoVoiceSection) momoVoiceSection.classList.add('hidden');
+        if (taskSection) taskSection.classList.add('hidden');
+        if (plannerSection) plannerSection.classList.add('hidden');
+        if (homeSection) {
+          homeSection.classList.remove('hidden');
+          void homeSection.offsetWidth;
+          homeSection.classList.remove('opacity-0', 'pointer-events-none');
+        }
+      }, 200);
+    }
+
+    function closeMomoVoice() {
+      goHome();
+    }
+
+    // Attach explicit click listener to Momo card for bulletproof response
+    const momoLauncherCard = document.getElementById('momo-launcher-card');
+    if (momoLauncherCard) {
+      momoLauncherCard.addEventListener('click', function(e) {
+        e.stopPropagation();
+        openMomoVoice();
+      });
+    }
+
+    // Attach explicit click listener to Task card for bulletproof response
+    const taskLauncherCard = document.getElementById('task-launcher-card');
+    if (taskLauncherCard) {
+      taskLauncherCard.addEventListener('click', function(e) {
+        e.stopPropagation();
+        openTaskManagement();
+      });
+    }
+
+    // Attach explicit click listener to Planner card for bulletproof response
+    const plannerLauncherCard = document.getElementById('planner-launcher-card');
+    if (plannerLauncherCard) {
+      plannerLauncherCard.addEventListener('click', function(e) {
+        e.stopPropagation();
+        openPlanner();
+      });
+    }
+
+    // ----------------------------------------------------
+    // Planner Calendar Logic & Full Interactivity
+    // ----------------------------------------------------
+    let currentActiveDay = '08';
+    let activeEventElement = null;
+    let toastTimer = null;
+
+    function showToast(message, icon) {
+      icon = icon || 'check_circle';
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toast-message');
+      const toastIcon = document.getElementById('toast-icon');
+
+      if (!toast) return;
+      if (toastTimer) clearTimeout(toastTimer);
+      if (toastMessage) toastMessage.textContent = message;
+      if (toastIcon) toastIcon.textContent = icon;
+
+      toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-3');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      toastTimer = setTimeout(() => {
+        toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-3');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+      }, 2800);
+    }
+
+    function switchView(viewName) {
+      const tabs = ['day', 'week', 'month', 'year'];
+      const indicator = document.getElementById('view-indicator');
+      const heading = document.getElementById('calendar-heading');
+      const viewBanner = document.getElementById('view-mode-banner');
+      const viewText = document.getElementById('view-mode-text');
+
+      tabs.forEach(tab => {
+        const btn = document.getElementById('view-tab-' + tab);
+        if (!btn) return;
+        if (tab === viewName) {
+          btn.classList.add('text-[#1F1F1F]');
+          btn.classList.remove('text-slate-400');
+          if (indicator && !btn.contains(indicator)) {
+            btn.appendChild(indicator);
+          }
+        } else {
+          btn.classList.remove('text-[#1F1F1F]');
+          btn.classList.add('text-slate-400');
+        }
+      });
+
+      if (!heading || !viewBanner || !viewText) return;
+      if (viewName === 'day') {
+        heading.textContent = 'Saturday, Nov 19th';
+        viewBanner.classList.remove('hidden');
+        viewText.textContent = 'Active view: Single Day Timeline (Nov 19th)';
+      } else if (viewName === 'week') {
+        heading.textContent = 'Nov 13 – Nov 19, 2023';
+        viewBanner.classList.remove('hidden');
+        viewText.textContent = 'Active view: Week Overview (7 days)';
+      } else if (viewName === 'month') {
+        heading.textContent = 'November 2023';
+        viewBanner.classList.add('hidden');
+      } else if (viewName === 'year') {
+        heading.textContent = 'Year 2023';
+        viewBanner.classList.remove('hidden');
+        viewText.textContent = 'Active view: Annual Horizon 2023';
+      }
+
+      showToast(`Switched to ${viewName.toUpperCase()} view`);
+    }
+
+    function toggleMenu() {
+      const menu = document.getElementById('more-menu-dropdown');
+      if (menu) menu.classList.toggle('hidden');
+    }
+
+    function selectDate(dayNum, titleString, updateHeading) {
+      const popover = document.getElementById('floating-day-popover');
+      const targetCell = document.querySelector(`[data-day="${dayNum}"]`);
+      
+      if (updateHeading) {
+        const heading = document.getElementById('calendar-heading');
+        if (heading) heading.textContent = titleString;
+      }
+
+      if (targetCell && popover) {
+        document.querySelectorAll('.cal-cell').forEach(c => c.classList.remove('has-popover', 'bg-slate-50/40'));
+        targetCell.classList.add('has-popover');
+        targetCell.appendChild(popover);
+        currentActiveDay = dayNum;
+
+        const topDate = document.getElementById('popover-top-date');
+        const bottomDate = document.getElementById('popover-bottom-date');
+        if (topDate) topDate.textContent = dayNum === '08' ? '01' : dayNum;
+        if (bottomDate) bottomDate.textContent = dayNum;
+        
+        showToast(`Selected ${titleString}`, 'calendar_month');
+      }
+    }
+
+    function openAddEventModal() {
+      const modal = document.getElementById('add-event-modal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        const input = document.getElementById('event-title-input');
+        if (input) input.focus();
+      }
+    }
+
+    function closeAddEventModal() {
+      const modal = document.getElementById('add-event-modal');
+      if (modal) modal.classList.add('hidden');
+      const form = document.getElementById('new-event-form');
+      if (form) form.reset();
+    }
+
+    function handleCreateEvent(e) {
+      e.preventDefault();
+      const titleInput = document.getElementById('event-title-input');
+      const dateInput = document.getElementById('event-date-input');
+      const timeInput = document.getElementById('event-time-input');
+      const catInput = document.querySelector('input[name="category"]:checked');
+      const notesInput = document.getElementById('event-notes-input');
+
+      const title = titleInput ? titleInput.value.trim() : '';
+      const date = dateInput ? dateInput.value : '19';
+      const time = timeInput ? timeInput.value : '19:00';
+      const category = catInput ? catInput.value : 'Event';
+      const notes = notesInput ? notesInput.value : 'Created via Quick Add';
+
+      if (!title) return;
+
+      const popoverList = document.getElementById('popover-events-list');
+      if (popoverList) {
+        const newChip = document.createElement('div');
+        newChip.className = "bg-[#1F1F1F] hover:bg-black cursor-pointer text-white text-[9.5px] px-2 py-1 rounded shadow-sm truncate transition-colors flex items-center justify-between";
+        newChip.innerHTML = `<span>${title}</span><span class="text-[8px] text-slate-400 font-mono">${time}</span>`;
+        newChip.onclick = (evt) => {
+          evt.stopPropagation();
+          openEventDrawer(title, time, `Nov ${date}`, category, notes);
+        };
+        popoverList.prepend(newChip);
+      }
+
+      const countBadge = document.getElementById('popover-count');
+      if (countBadge) {
+        countBadge.textContent = parseInt(countBadge.textContent || '0') + 1;
+      }
+
+      closeAddEventModal();
+      showToast(`Event "${title}" added to calendar!`);
+    }
+
+    function openEventDrawer(title, time, date, category, notes) {
+      const titleEl = document.getElementById('detail-title');
+      const timeEl = document.getElementById('detail-time');
+      const dateEl = document.getElementById('detail-date');
+      const badgeEl = document.getElementById('detail-category-badge');
+      const notesEl = document.getElementById('detail-notes');
+      const modal = document.getElementById('event-detail-modal');
+
+      if (titleEl) titleEl.textContent = title;
+      if (timeEl) timeEl.textContent = time || 'Flexible';
+      if (dateEl) dateEl.textContent = `• ${date}`;
+      if (badgeEl) badgeEl.textContent = category || 'General';
+      if (notesEl) notesEl.textContent = notes || 'No extra notes provided.';
+
+      activeEventElement = (window.event && window.event.currentTarget) ? window.event.currentTarget : null;
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeEventDetailModal() {
+      const modal = document.getElementById('event-detail-modal');
+      if (modal) modal.classList.add('hidden');
+      activeEventElement = null;
+    }
+
+    function deleteCurrentEvent() {
+      if (activeEventElement) {
+        activeEventElement.remove();
+        const countBadge = document.getElementById('popover-count');
+        if (countBadge && parseInt(countBadge.textContent) > 0) {
+          countBadge.textContent = parseInt(countBadge.textContent) - 1;
+        }
+      }
+      closeEventDetailModal();
+      showToast('Event removed from schedule', 'delete');
+    }
+
+    function triggerAiSchedule() {
+      const modal = document.getElementById('ai-assistant-modal');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      
+      const transcript = document.getElementById('ai-prompt-transcript');
+      const statusTag = document.getElementById('ai-status-tag');
+      if (statusTag) statusTag.textContent = 'Listening...';
+      if (transcript) transcript.textContent = '“Analyzing your Nov 19 agenda and conflict resolution...”';
+
+      setTimeout(() => {
+        if (statusTag) statusTag.textContent = 'Optimized';
+        if (transcript) transcript.textContent = '“Optimizing your Nov 19 schedule... 1 conflict resolved!”';
+      }, 1100);
+    }
+
+    function closeAiAssistantModal() {
+      const modal = document.getElementById('ai-assistant-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function applyAiOptimization() {
+      closeAiAssistantModal();
+      showToast('AI schedule optimization applied to Nov 19!', 'auto_awesome');
+      selectDate('19', 'Saturday, Nov 19th', true);
+    }
+
+    // Escape Key & Modal Backdrop Listeners
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeAddEventModal();
+        closeEventDetailModal();
+        closeAiAssistantModal();
+        const menu = document.getElementById('more-menu-dropdown');
+        if (menu) menu.classList.add('hidden');
+      }
+    });
+
+    const addEventModal = document.getElementById('add-event-modal');
+    if (addEventModal) addEventModal.addEventListener('click', closeAddEventModal);
+
+    const eventDetailModal = document.getElementById('event-detail-modal');
+    if (eventDetailModal) eventDetailModal.addEventListener('click', closeEventDetailModal);
+
+    const aiModal = document.getElementById('ai-assistant-modal');
+    if (aiModal) aiModal.addEventListener('click', closeAiAssistantModal);
+
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('more-menu-dropdown');
+      const menuBtn = document.getElementById('more-menu-btn');
+      if (menu && menuBtn && !menu.contains(e.target) && !menuBtn.contains(e.target)) {
+        menu.classList.add('hidden');
+      }
+    });
+
+    // ----------------------------------------------------
+    // Home Launcher Momo Mini Orb Interactions
+    // ----------------------------------------------------
+    const orb = document.getElementById('momoOrb');
+    const miniLeftEye = document.getElementById('leftEye');
+    const miniRightEye = document.getElementById('rightEye');
+
+    function miniBlink() {
+      if (!miniLeftEye || !miniRightEye) return;
+      miniLeftEye.style.transform = 'scaleY(0.1)';
+      miniRightEye.style.transform = 'scaleY(0.1)';
+      setTimeout(() => {
+        miniLeftEye.style.transform = 'scaleY(1)';
+        miniRightEye.style.transform = 'scaleY(1)';
+      }, 160);
+    }
+
+    function scheduleMiniBlink() {
+      const nextInterval = Math.random() * 3500 + 2000;
+      setTimeout(() => {
+        miniBlink();
+        scheduleMiniBlink();
+      }, nextInterval);
+    }
+    scheduleMiniBlink();
+
+    // ----------------------------------------------------
+    // Live Clock and Date Updater
+    // ----------------------------------------------------
+    const clockEl = document.getElementById('liveClock');
+    const dateEl = document.getElementById('liveDate');
+
+    function updateLiveTime() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      if (clockEl) clockEl.textContent = `${hours}:${minutes}`;
+
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      
+      const dayName = days[now.getDay()];
+      const dayNum = now.getDate();
+      const monthName = months[now.getMonth()];
+      const year = now.getFullYear();
+
+      if (dateEl) dateEl.textContent = `${dayNum} ${monthName}, ${dayName}, ${year}`;
+    }
+    updateLiveTime();
+    setInterval(updateLiveTime, 1000);
+
+    // ----------------------------------------------------
+    // AgentChat: Momo Speech & Message Stream Engine
+    // ----------------------------------------------------
+    const aiResponseContainer = document.getElementById('ai-response-container');
+    const chatMessagesScroll = document.getElementById('chat-messages-scroll');
+    const chatMessagesList = document.getElementById('chat-messages-list');
+    const chatTextarea = document.getElementById('chat-textarea');
+    const chatSubmitBtn = document.getElementById('chat-submit-btn');
+    const chatSendIcon = document.getElementById('chat-send-icon');
+    const chatStopIcon = document.getElementById('chat-stop-icon');
+
+    let streamInterval = null;
+    let isChatStreaming = false;
+
+    const momoSpokenResponses = [
+      "Analyzing step by step... All campus services are online and operating smoothly. Your morning lecture in Hall B starts at 10:15 AM.",
+      "Checking your schedule... You have a study group session at the library at 2:00 PM and assignment submissions due tomorrow evening.",
+      "Voice recognition verified. Campus AI is tuned to your profile. Feel free to ask about events, study planners, or lecture schedules."
+    ];
+    let responseIndex = 0;
+
+    function appendUserMessage(text) {
+      const userDiv = document.createElement('div');
+      userDiv.className = 'flex justify-end';
+      const bubble = document.createElement('div');
+      bubble.className = 'max-w-[80%] px-3.5 py-2 rounded-2xl bg-neutral-100 dark:bg-neutral-800 text-sm text-neutral-900 dark:text-neutral-100 whitespace-pre-wrap break-words';
+      bubble.textContent = text;
+      userDiv.appendChild(bubble);
+      chatMessagesList.appendChild(userDiv);
+      scrollChatToBottom();
+    }
+
+    function startAiResponseStream(customText) {
+      aiResponseContainer.classList.remove('opacity-0', 'pointer-events-none', 'translate-x-8');
+      aiResponseContainer.classList.add('opacity-100', 'pointer-events-auto', 'translate-x-0');
+
+      if (streamInterval) clearInterval(streamInterval);
+      isChatStreaming = true;
+      updateChatButtonState();
+
+      const textToStream = customText || momoSpokenResponses[responseIndex % momoSpokenResponses.length];
+      responseIndex++;
+      const words = textToStream.split(' ');
+
+      const assistantDiv = document.createElement('div');
+      assistantDiv.className = 'flex justify-start';
+      const textElem = document.createElement('div');
+      textElem.className = 'max-w-[90%] text-sm leading-relaxed text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap break-words';
+      textElem.textContent = '';
+      assistantDiv.appendChild(textElem);
+      chatMessagesList.appendChild(assistantDiv);
+
+      let idx = 0;
+      streamInterval = setInterval(() => {
+        idx += 1;
+        textElem.textContent = words.slice(0, idx).join(' ');
+        scrollChatToBottom();
+
+        if (idx >= words.length) {
+          clearInterval(streamInterval);
+          streamInterval = null;
+          isChatStreaming = false;
+          updateChatButtonState();
+          if (currentState === 'Thinking') {
+            setState('Speaking');
+            setTimeout(() => {
+              if (currentState === 'Speaking') {
+                setState('Idle');
+              }
+            }, 3000);
+          }
+        }
+      }, 90);
+    }
+
+    function stopAiResponseStream() {
+      if (streamInterval) {
+        clearInterval(streamInterval);
+        streamInterval = null;
+      }
+      isChatStreaming = false;
+      updateChatButtonState();
+    }
+
+    function hideAiResponse() {
+      stopAiResponseStream();
+      aiResponseContainer.classList.add('opacity-0', 'pointer-events-none', 'translate-x-8');
+      aiResponseContainer.classList.remove('opacity-100', 'pointer-events-auto', 'translate-x-0');
+    }
+
+    function scrollChatToBottom() {
+      if (chatMessagesScroll) {
+        chatMessagesScroll.scrollTo({
+          top: chatMessagesScroll.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
+    }
+
+    function updateChatButtonState() {
+      if (!chatSubmitBtn || !chatSendIcon || !chatStopIcon) return;
+      if (isChatStreaming) {
+        chatSendIcon.classList.add('hidden');
+        chatStopIcon.classList.remove('hidden');
+        chatSubmitBtn.className = 'inline-flex items-center justify-center w-8 h-8 rounded-full transition-all duration-150 bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 cursor-pointer';
+      } else {
+        chatStopIcon.classList.add('hidden');
+        chatSendIcon.classList.remove('hidden');
+        const hasText = chatTextarea && chatTextarea.value.trim().length > 0;
+        if (hasText) {
+          chatSubmitBtn.className = 'inline-flex items-center justify-center w-8 h-8 rounded-full transition-all duration-150 bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 cursor-pointer';
+        } else {
+          chatSubmitBtn.className = 'inline-flex items-center justify-center w-8 h-8 rounded-full transition-all duration-150 bg-neutral-200 text-neutral-400 dark:bg-neutral-800 dark:text-neutral-600';
+        }
+      }
+    }
+
+    function handleChatSend() {
+      if (isChatStreaming) {
+        stopAiResponseStream();
+        return;
+      }
+      if (!chatTextarea) return;
+      const text = chatTextarea.value.trim();
+      if (!text) return;
+
+      appendUserMessage(text);
+      chatTextarea.value = '';
+      chatTextarea.style.height = '44px';
+      updateChatButtonState();
+
+      // Trigger Momo thinking & speaking response
+      setState('Thinking');
+    }
+
+    if (chatTextarea) {
+      chatTextarea.addEventListener('input', function() {
+        this.style.height = '0';
+        const next = Math.min(this.scrollHeight, 120);
+        this.style.height = `${next}px`;
+        this.style.overflowY = this.scrollHeight > 120 ? 'auto' : 'hidden';
+        updateChatButtonState();
+      });
+
+      chatTextarea.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          handleChatSend();
+        }
+      });
+    }
+
+    if (chatSubmitBtn) {
+      chatSubmitBtn.addEventListener('click', handleChatSend);
+    }
+
+    // ----------------------------------------------------
+    // Voice Status State Controller & Displacement Logic
+    // ----------------------------------------------------
+    const statusText = document.getElementById('voice-status-text');
+    const pulseRing = document.getElementById('mic-pulse-ring');
+    const micBtn = document.getElementById('mic-toggle-btn');
+    const micIcon = document.getElementById('mic-icon');
+    const wave = document.getElementById('status-wave');
+    let currentState = 'Idle';
+    let listenTimeout = null;
+
+    function setState(state) {
+      currentState = state;
+
+      document.querySelectorAll('.state-pill').forEach(btn => {
+        if (btn.getAttribute('data-state') === state) {
+          btn.className = 'state-pill px-3 py-1 text-xs rounded-full font-medium transition-all duration-200 bg-neutral-900 text-white shadow-xs';
+        } else {
+          btn.className = 'state-pill px-3 py-1 text-xs rounded-full font-medium transition-all duration-200 text-neutral-600 hover:text-black';
+        }
+      });
+
+      if (state === 'Listening') {
+        statusText.textContent = 'Listening...';
+        pulseRing.className = 'absolute -inset-4 rounded-full bg-cyan-400/30 blur-md opacity-100 animate-pulse transition-opacity duration-300';
+        micBtn.style.borderColor = 'rgba(0, 240, 255, 0.7)';
+        micBtn.style.backgroundColor = '#16282B';
+        micIcon.textContent = 'mic';
+        wave.classList.remove('hidden');
+
+        // Sphere stays centered during listening
+        targetSphereOffsetX = 0;
+        hideAiResponse();
+
+        // After listening finishes, automatically transition to Thinking
+        if (listenTimeout) clearTimeout(listenTimeout);
+        listenTimeout = setTimeout(() => {
+          if (currentState === 'Listening') {
+            setState('Thinking');
+          }
+        }, 3200);
+
+      } else if (state === 'Thinking') {
+        if (listenTimeout) clearTimeout(listenTimeout);
+        statusText.textContent = 'Momo is thinking…';
+        pulseRing.className = 'absolute -inset-4 rounded-full bg-purple-500/30 blur-md opacity-100 animate-pulse transition-opacity duration-300';
+        micBtn.style.borderColor = 'rgba(180, 100, 255, 0.6)';
+        micBtn.style.backgroundColor = '#23162b';
+        micIcon.textContent = 'psychology';
+        wave.classList.add('hidden');
+
+        // Displace sphere to the left side and reveal AI Response Writer on the right
+        targetSphereOffsetX = (window.innerWidth >= 1024) ? -1.65 : 0;
+        startAiResponseStream();
+
+      } else if (state === 'Speaking') {
+        if (listenTimeout) clearTimeout(listenTimeout);
+        statusText.textContent = 'Momo is speaking…';
+        pulseRing.className = 'absolute -inset-4 rounded-full bg-teal-400/20 blur-md opacity-100 transition-opacity duration-300';
+        micBtn.style.borderColor = 'rgba(45, 212, 191, 0.6)';
+        micBtn.style.backgroundColor = '#162b25';
+        micIcon.textContent = 'volume_up';
+        wave.classList.remove('hidden');
+
+        // Maintain displacement so response stays visible on the right
+        targetSphereOffsetX = (window.innerWidth >= 1024) ? -1.65 : 0;
+
+      } else { // Idle
+        if (listenTimeout) clearTimeout(listenTimeout);
+        statusText.textContent = 'Tap microphone to speak';
+        pulseRing.className = 'absolute -inset-4 rounded-full bg-cyan-400/20 blur-md opacity-0 transition-opacity duration-300';
+        micBtn.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+        micBtn.style.backgroundColor = '#1F1F1F';
+        micIcon.textContent = 'mic';
+        wave.classList.add('hidden');
+
+        // Return sphere to center and hide AI response card
+        targetSphereOffsetX = 0;
+        hideAiResponse();
+      }
+    }
+
+    function toggleMic() {
+      if (currentState === 'Listening') {
+        setState('Thinking');
+      } else if (currentState === 'Thinking' || currentState === 'Speaking') {
+        setState('Idle');
+      } else {
+        setState('Listening');
+      }
+    }
+
+    // ----------------------------------------------------
+    // Three.js Charcoal Black Smoked-Glass 3D Sphere
+    // ----------------------------------------------------
+    let threeInitialized = false;
+    let scene, camera, renderer, masterGroup, orbUniforms, threeLeftEye, threeRightEye;
+    let mouseX = 0, mouseY = 0;
+    let targetX = 0, targetY = 0;
+    let sphereCurrentX = 0;
+    let targetSphereOffsetX = 0;
+    const container = document.getElementById('threejs-container-ANIMATION_12');
+
+    function initThreeJS() {
+      threeInitialized = true;
+      const width = container.clientWidth || window.innerWidth;
+      const height = container.clientHeight || window.innerHeight;
+
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+      camera.position.set(0, 0.35, 8.6);
+
+      renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      renderer.setSize(width, height);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.appendChild(renderer.domElement);
+
+      masterGroup = new THREE.Group();
+      scene.add(masterGroup);
+
+      // Vertex Shader
+      const vertexShader = `
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        varying vec3 vViewPosition;
+
+        void main() {
+          vNormal = normalize(normalMatrix * normal);
+          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+          vPosition = position;
+          vViewPosition = -mvPosition.xyz;
+          gl_Position = projectionMatrix * mvPosition;
+        }
+      `;
+
+      // Fragment Shader for Charcoal Black Smoked-Glass / Satin-Metal Sphere
+      const fragmentShader = `
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        varying vec3 vViewPosition;
+        uniform float u_time;
+        uniform vec2 u_mouse;
+
+        void main() {
+          vec3 N = normalize(vNormal);
+          vec3 V = normalize(vViewPosition);
+
+          vec3 cBase = vec3(0.121, 0.121, 0.121);
+          vec3 cShadow = vec3(0.031, 0.035, 0.043);
+          vec3 cHighlight = vec3(0.682, 0.702, 0.729);
+          vec3 cPureWhite = vec3(0.92, 0.94, 0.96);
+
+          vec3 lightDir1 = normalize(vec3(0.7, 0.85, 0.75));
+          vec3 lightDir2 = normalize(vec3(-0.6, -0.4, 0.5));
+
+          float NdotL1 = dot(N, lightDir1);
+          float diff1 = smoothstep(-0.25, 0.9, NdotL1);
+          float diff2 = max(dot(N, lightDir2), 0.0) * 0.15;
+
+          vec3 col = mix(cShadow, cBase, diff1);
+          col += cBase * diff2;
+
+          float ao = smoothstep(-1.0, 0.5, N.y * 0.7 + N.z * 0.3);
+          col = mix(cShadow * 0.8, col, ao);
+
+          vec3 H1 = normalize(lightDir1 + V);
+          float NdotH1 = max(dot(N, H1), 0.0);
+          float broadSpec = pow(NdotH1, 8.0) * 0.35;
+          float sharpSpec = pow(NdotH1, 42.0) * 0.65;
+          col += cHighlight * broadSpec + cPureWhite * sharpSpec;
+
+          vec3 R = reflect(-V, N);
+          float curvedGlance = smoothstep(0.4, 0.95, R.y * 0.6 + R.x * 0.5) * 0.18;
+          col += cHighlight * curvedGlance;
+
+          float fresnel = 1.0 - max(dot(N, V), 0.0);
+          float rim = smoothstep(0.55, 0.96, fresnel);
+          col = mix(col, col + cHighlight * 0.75, rim);
+
+          float innerGlow = smoothstep(0.8, 0.0, length(vPosition.xy) / 2.0) * 0.04;
+          col += cHighlight * innerGlow;
+
+          gl_FragColor = vec4(col, 1.0);
+        }
+      `;
+
+      // Primary Charcoal Black Sphere
+      const orbGeo = new THREE.SphereGeometry(2.0, 128, 128);
+      orbUniforms = {
+        u_time: { value: 0 },
+        u_mouse: { value: new THREE.Vector2(0, 0) }
+      };
+      const orbMat = new THREE.ShaderMaterial({
+        vertexShader: vertexShader,
+        fragmentShader: fragmentShader,
+        uniforms: orbUniforms,
+        transparent: false
+      });
+      const orbMesh = new THREE.Mesh(orbGeo, orbMat);
+      masterGroup.add(orbMesh);
+
+      // Outer Clear Smoked-Glass Shell
+      const glassGeo = new THREE.SphereGeometry(2.02, 128, 128);
+      const glassMat = new THREE.MeshPhysicalMaterial({
+        color: 0x1F1F1F,
+        metalness: 0.25,
+        roughness: 0.12,
+        transmission: 0.45,
+        thickness: 0.35,
+        transparent: true,
+        opacity: 0.32,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.08
+      });
+      const glassMesh = new THREE.Mesh(glassGeo, glassMat);
+      masterGroup.add(glassMesh);
+
+      // Twin Pill-Shaped White Eyes (Capsules)
+      function createPillEye(xOffset) {
+        const eyeGroup = new THREE.Group();
+        const cylinderGeo = new THREE.CylinderGeometry(0.13, 0.13, 0.32, 32);
+        const capGeo = new THREE.SphereGeometry(0.13, 32, 16);
+        const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+        const cyl = new THREE.Mesh(cylinderGeo, eyeMat);
+        const topCap = new THREE.Mesh(capGeo, eyeMat);
+        topCap.position.y = 0.16;
+        const botCap = new THREE.Mesh(capGeo, eyeMat);
+        botCap.position.y = -0.16;
+
+        eyeGroup.add(cyl);
+        eyeGroup.add(topCap);
+        eyeGroup.add(botCap);
+        eyeGroup.position.set(xOffset, 0.12, 2.05);
+        return eyeGroup;
+      }
+
+      threeLeftEye = createPillEye(-0.25);
+      threeRightEye = createPillEye(0.25);
+      masterGroup.add(threeLeftEye);
+      masterGroup.add(threeRightEye);
+
+      // Studio Lighting
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+      scene.add(ambientLight);
+
+      const dirLight1 = new THREE.DirectionalLight(0xAEB3BA, 1.8);
+      dirLight1.position.set(4, 5, 4);
+      scene.add(dirLight1);
+
+      const dirLight2 = new THREE.DirectionalLight(0xAEB3BA, 0.5);
+      dirLight2.position.set(-3, -2, 2);
+      scene.add(dirLight2);
+
+      // Mouse & Window listeners
+      window.addEventListener('mousemove', onThreeMouseMove);
+      window.addEventListener('resize', onThreeResize);
+
+      // Start loop
+      const clock = new THREE.Clock();
+      function animate() {
+        requestAnimationFrame(animate);
+        const elapsedTime = clock.getElapsedTime();
+        if (orbUniforms) orbUniforms.u_time.value = elapsedTime;
+
+        targetX += (mouseX - targetX) * 0.05;
+        targetY += (mouseY - targetY) * 0.05;
+
+        // Smooth breathing & cursor follow
+        masterGroup.rotation.y = targetX * 1.2 + Math.sin(elapsedTime * 0.4) * 0.05;
+        masterGroup.rotation.x = targetY * 1.2 + Math.cos(elapsedTime * 0.35) * 0.04;
+        
+        // Voice active reaction bobbing
+        let floatMultiplier = (currentState === 'Speaking') ? 0.12 : 0.06;
+        masterGroup.position.y = Math.sin(elapsedTime * (currentState === 'Speaking' ? 1.6 : 0.8)) * floatMultiplier;
+
+        // Smooth cinematic displacement along X axis for left/right split
+        sphereCurrentX += (targetSphereOffsetX - sphereCurrentX) * 0.06;
+        masterGroup.position.x = sphereCurrentX;
+
+        // Eye blink animation
+        const blinkCycle = Math.sin(elapsedTime * 0.8);
+        if (blinkCycle > 0.985) {
+          threeLeftEye.scale.y = 0.15;
+          threeRightEye.scale.y = 0.15;
+        } else {
+          threeLeftEye.scale.y = 1.0;
+          threeRightEye.scale.y = 1.0;
+        }
+
+        renderer.render(scene, camera);
+      }
+      animate();
+    }
+
+    function onThreeMouseMove(e) {
+      const halfW = window.innerWidth / 2;
+      const halfH = window.innerHeight / 2;
+      mouseX = (e.clientX - halfW) * 0.001;
+      mouseY = (e.clientY - halfH) * 0.001;
+      if (orbUniforms && orbUniforms.u_mouse) {
+        orbUniforms.u_mouse.value.set(e.clientX, e.clientY);
+      }
+    }
+
+    function onThreeResize() {
+      if (!renderer || !camera || !container) return;
+      const w = container.clientWidth || window.innerWidth;
+      const h = container.clientHeight || window.innerHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+
+      if (w < 640) {
+        camera.position.set(0, 0.45, 9.4);
+      } else if (w < 1024) {
+        camera.position.set(0, 0.4, 8.9);
+      } else {
+        camera.position.set(0, 0.35, 8.6);
+      }
+
+      // Recalculate displacement offset based on screen width
+      if (currentState === 'Thinking' || currentState === 'Speaking') {
+        targetSphereOffsetX = (w >= 1024) ? -1.75 : 0;
+      } else {
+        targetSphereOffsetX = 0;
+      }
+    }
+  </script>
+
+  <!-- BEGIN: AddTaskModal -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 transition-all duration-200 hidden" id="task-modal">
+<div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all scale-100">
+<!-- Modal Header -->
+<div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-[#f8fafc]/60">
+<div class="flex items-center gap-2">
+<span class="w-7 h-7 rounded-full bg-[#1F1F1F] text-white flex items-center justify-center font-bold text-sm">+</span>
+<h3 class="text-base font-bold text-slate-800 tracking-tight" id="modal-heading">Create New Task</h3>
+</div>
+<button class="w-8 h-8 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center transition" id="btn-close-modal" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+</div>
+<!-- Modal Form Content -->
+<form class="p-6 flex flex-col gap-4 text-xs" id="create-task-form">
+<input id="task-edit-id" type="hidden" value=""/>
+<!-- Task Title -->
+<div>
+<label class="block font-semibold text-slate-700 mb-1.5" for="task-title-input">Task Title</label>
+<input class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1F1F1F] focus:ring-1 focus:ring-[#1F1F1F] transition" id="task-title-input" placeholder="e.g., Redesign Mobile App UI" required="" type="text"/>
+</div>
+<!-- Category & Stage Row -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+<div>
+<label class="block font-semibold text-slate-700 mb-1.5" for="task-category-input">Category / Board</label>
+<select class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-700 bg-white focus:outline-none focus:border-[#1F1F1F] focus:ring-1 focus:ring-[#1F1F1F] transition" id="task-category-input">
+<option value="Assignments">🟣 Assignments</option>
+<option value="Team Projects">🔵 Team Projects</option>
+<option value="Personal Goal">🟡 Personal Goal</option>
+<option value="Courses">🌸 Courses</option>
+</select>
+</div>
+<div>
+<label class="block font-semibold text-slate-700 mb-1.5" for="task-stage-input">Workflow Stage</label>
+<select class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-700 bg-white focus:outline-none focus:border-[#1F1F1F] focus:ring-1 focus:ring-[#1F1F1F] transition" id="task-stage-input">
+<option value="Draft">Draft</option>
+<option value="In Progress">In Progress</option>
+<option value="Editing">Editing</option>
+<option value="Done">Done</option>
+</select>
+</div>
+</div>
+<!-- Estimated Hours & Time Slot Row -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+<div>
+<label class="block font-semibold text-slate-700 mb-1.5" for="task-day-input">Day</label>
+<select class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-700 bg-white focus:outline-none focus:border-[#1F1F1F] focus:ring-1 focus:ring-[#1F1F1F] transition" id="task-day-input">
+<option value="Monday">Monday</option>
+<option selected="" value="Tuesday">Tuesday</option>
+<option value="Wednesday">Wednesday</option>
+<option value="Thursday">Thursday</option>
+<option value="Friday">Friday</option>
+<option value="Saturday">Saturday</option>
+<option value="Sunday">Sunday</option>
+</select>
+</div>
+<div>
+<label class="block font-semibold text-slate-700 mb-1.5" for="task-timeslot-input">Scheduled Slot</label>
+<select class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-700 bg-white focus:outline-none focus:border-[#1F1F1F] focus:ring-1 focus:ring-[#1F1F1F] transition" id="task-timeslot-input">
+<option value="08:30">08:30 - 09:00</option>
+<option value="09:00">09:00 - 09:30</option>
+<option selected="" value="09:30">09:30 - 10:30</option>
+<option value="09:45">09:45 - 10:30</option>
+<option value="10:30">10:30 - 11:00</option>
+<option value="11:00">11:00 - 11:30</option>
+</select>
+</div>
+<div>
+<label class="block font-semibold text-slate-700 mb-1.5" for="task-hours-input">Estimated Time</label>
+<input class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1F1F1F] focus:ring-1 focus:ring-[#1F1F1F] transition" id="task-hours-input" placeholder="e.g. 2 hrs" type="text" value="2 hrs"/>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center justify-end gap-2.5 pt-3 mt-2 border-t border-slate-100">
+<button class="px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-full transition" id="btn-cancel-modal" type="button">Cancel</button>
+<button class="px-5 py-2 text-xs font-medium text-white bg-[#1F1F1F] hover:bg-[#141414] rounded-full shadow-sm transition flex items-center gap-1.5" id="btn-submit-task" type="submit">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span id="btn-submit-text">Add Task</span>
+</button>
+</div>
+</form>
+</div>
+</div>
+<!-- Toast Notification -->
+<div class="hidden fixed bottom-6 right-6 z-50 bg-[#1F1F1F] text-white px-4 py-2.5 rounded-xl shadow-xl border border-slate-800 flex items-center gap-2.5 text-xs transition duration-300 transform translate-y-2 opacity-0" id="task-toast">
+<span class="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold">✓</span>
+<span id="toast-message">Task updated successfully!</span>
+</div>
+
+  <script id="dashboard-full-interactive-logic">
+(function() {
+  // Global State for Tasks
+  var tasks = [
+    {
+      id: 'task-1',
+      title: 'Design System Typography & Tokens',
+      category: 'Assignments',
+      stage: 'Draft',
+      day: 'Monday',
+      slot: '09:00',
+      hours: '3.5 hrs',
+      comments: 2,
+      attachments: 1
+    },
+    {
+      id: 'task-2',
+      title: 'Realtime WebSocket Sync Engine',
+      category: 'Team Projects',
+      stage: 'In Progress',
+      day: 'Tuesday',
+      slot: '09:30',
+      hours: '4.0 hrs',
+      comments: 5,
+      attachments: 3
+    },
+    {
+      id: 'task-3',
+      title: 'Review Sprint Deliverables & Code',
+      category: 'Personal Goal',
+      stage: 'Editing',
+      day: 'Wednesday',
+      slot: '10:30',
+      hours: '1.5 hrs',
+      comments: 1,
+      attachments: 0
+    },
+    {
+      id: 'task-4',
+      title: 'Python Fast-API Microservice Module',
+      category: 'Courses',
+      stage: 'Done',
+      day: 'Tuesday',
+      slot: '08:30',
+      hours: '2.0 hrs',
+      comments: 4,
+      attachments: 2
+    }
+  ];
+
+  var categoryColors = {
+    'Assignments': { bg: 'bg-[#b388ff]/10', border: 'border-[#b388ff]/40', tagBg: 'bg-[#b388ff]/20', tagText: 'text-[#8244e8]', dot: 'bg-[#b388ff]' },
+    'Team Projects': { bg: 'bg-[#6b9dfa]/10', border: 'border-[#6b9dfa]/40', tagBg: 'bg-[#6b9dfa]/20', tagText: 'text-[#2563eb]', dot: 'bg-[#6b9dfa]' },
+    'Personal Goal': { bg: 'bg-[#fbc44f]/15', border: 'border-[#fbc44f]/40', tagBg: 'bg-[#fbc44f]/25', tagText: 'text-[#ca8a04]', dot: 'bg-[#fbc44f]' },
+    'Courses': { bg: 'bg-[#f97bb3]/10', border: 'border-[#f97bb3]/40', tagBg: 'bg-[#f97bb3]/20', tagText: 'text-[#db2777]', dot: 'bg-[#f97bb3]' }
+  };
+
+  var stagesOrder = ['Draft', 'In Progress', 'Editing', 'Done'];
+
+  // DOM Elements
+  var modal = document.getElementById('task-modal');
+  var form = document.getElementById('create-task-form');
+  var modalHeading = document.getElementById('modal-heading');
+  var submitBtnText = document.getElementById('btn-submit-text');
+  var taskIdInput = document.getElementById('task-edit-id');
+  var titleInput = document.getElementById('task-title-input');
+  var categoryInput = document.getElementById('task-category-input');
+  var stageInput = document.getElementById('task-stage-input');
+  var dayInput = document.getElementById('task-day-input');
+  var timeInput = document.getElementById('task-timeslot-input');
+  var hoursInput = document.getElementById('task-hours-input');
+  var toast = document.getElementById('task-toast');
+  var toastMsg = document.getElementById('toast-message');
+
+  function showToast(text) {
+    if (!toast || !toastMsg) return;
+    toastMsg.textContent = text;
+    toast.classList.remove('hidden');
+    requestAnimationFrame(function() {
+      toast.classList.remove('translate-y-2', 'opacity-0');
+    });
+    setTimeout(function() {
+      toast.classList.add('translate-y-2', 'opacity-0');
+      setTimeout(function() { toast.classList.add('hidden'); }, 300);
+    }, 2400);
+  }
+
+  function openTaskModal(prefill) {
+    if (!modal) return;
+    prefill = prefill || {};
+    taskIdInput.value = prefill.id || '';
+    if (prefill.id) {
+      modalHeading.textContent = 'Edit Task';
+      submitBtnText.textContent = 'Save Changes';
+    } else {
+      modalHeading.textContent = 'Create New Task';
+      submitBtnText.textContent = 'Add Task';
+    }
+    if (prefill.title !== undefined) titleInput.value = prefill.title;
+    else titleInput.value = '';
+    if (prefill.category) categoryInput.value = prefill.category;
+    if (prefill.stage) stageInput.value = prefill.stage;
+    if (prefill.day) dayInput.value = prefill.day;
+    if (prefill.slot) timeInput.value = prefill.slot;
+    if (prefill.hours) hoursInput.value = prefill.hours;
+    else if (!prefill.id) hoursInput.value = '2 hrs';
+
+    modal.classList.remove('hidden');
+    titleInput.focus();
+  }
+
+  function closeTaskModal() {
+    if (!modal) return;
+    modal.classList.add('hidden');
+    if (form) form.reset();
+    taskIdInput.value = '';
+  }
+
+  // Render Kanban and Schedule
+  function renderAll() {
+    stagesOrder.forEach(function(stg) {
+      var col = document.querySelector('.kanban-col[data-stage="' + stg + '"]');
+      if (!col) return;
+      var list = col.querySelector('.kanban-task-list');
+      var badge = col.querySelector('.badge-count');
+      var footerStat = col.querySelector('.footer-stat');
+      var emptyBtn = col.querySelector('.btn-open-kanban');
+
+      var stgTasks = tasks.filter(function(t) { return t.stage === stg; });
+      if (badge) badge.textContent = stgTasks.length;
+
+      // Update footer stats
+      if (footerStat) {
+        var count = stgTasks.length;
+        if (stg === 'Draft') footerStat.textContent = count + (count === 1 ? ' item saved' : ' items saved');
+        else if (stg === 'In Progress') footerStat.textContent = count + (count === 1 ? ' active timer' : ' active timers');
+        else if (stg === 'Editing') footerStat.textContent = count + (count === 1 ? ' under review' : ' under review');
+        else if (stg === 'Done') footerStat.textContent = (count > 0 ? (count * 25) + '% sprint progress' : '0% sprint progress');
+      }
+
+      // Update empty prompt visibility
+      if (emptyBtn) {
+        var titleSpan = emptyBtn.querySelector('.empty-col-title');
+        var subSpan = emptyBtn.querySelector('.empty-col-sub');
+        if (stgTasks.length === 0) {
+          if (titleSpan) titleSpan.textContent = 'No tasks in ' + stg;
+          if (subSpan) subSpan.textContent = 'Click to create task';
+        } else {
+          if (titleSpan) titleSpan.textContent = '+ Add another task';
+          if (subSpan) subSpan.textContent = 'Add to ' + stg;
+        }
+      }
+
+      if (list) {
+        list.innerHTML = '';
+        stgTasks.forEach(function(task) {
+          var meta = categoryColors[task.category] || categoryColors['Assignments'];
+          var currStageIndex = stagesOrder.indexOf(task.stage);
+          var prevStage = currStageIndex > 0 ? stagesOrder[currStageIndex - 1] : null;
+          var nextStage = currStageIndex < stagesOrder.length - 1 ? stagesOrder[currStageIndex + 1] : null;
+
+          var card = document.createElement('div');
+          card.className = 'group/card kanban-card relative p-3 rounded-xl border ' + meta.border + ' ' + meta.bg + ' bg-white hover:border-slate-400/80 shadow-sm transition-all text-left cursor-grab active:cursor-grabbing';
+          card.setAttribute('draggable', 'true');
+          card.setAttribute('data-task-id', task.id);
+
+          var isDone = task.stage === 'Done';
+
+          card.innerHTML =
+            '<div class="flex items-center justify-between gap-1 mb-1.5">' +
+              '<span class="text-[10px] font-semibold ' + meta.tagText + ' px-1.5 py-0.5 rounded-md ' + meta.tagBg + ' flex items-center gap-1 truncate">' +
+                '<span class="w-1.5 h-1.5 rounded-full ' + meta.dot + ' shrink-0"></span>' +
+                task.category +
+              '</span>' +
+              '<div class="flex items-center gap-1 shrink-0">' +
+                '<span class="text-[9px] text-slate-500 font-medium bg-slate-100/90 px-1.5 py-0.5 rounded-md">' + task.hours + '</span>' +
+                '<button type="button" class="btn-card-edit text-slate-400 hover:text-slate-700 p-0.5 rounded hover:bg-slate-100 transition" title="Edit Task">' +
+                  '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"></path></svg>' +
+                '</button>' +
+                '<button type="button" class="btn-card-delete text-slate-400 hover:text-red-600 p-0.5 rounded hover:bg-red-50 transition" title="Delete Task">' +
+                  '<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round"></path></svg>' +
+                '</button>' +
+              '</div>' +
+            '</div>' +
+            '<div class="text-xs font-semibold text-slate-800 leading-snug mb-2 ' + (isDone ? 'line-through text-slate-400' : '') + '">' +
+              task.title +
+            '</div>' +
+            '<div class="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-100/60 mt-1">' +
+              '<div class="flex items-center gap-2">' +
+                '<span class="flex items-center gap-0.5 text-slate-500">' +
+                  '<svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path></svg>' +
+                  (task.comments || 1) +
+                '</span>' +
+                '<span class="flex items-center gap-0.5 text-slate-500">' +
+                  '<svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>' +
+                  (task.attachments || 1) +
+                '</span>' +
+              '</div>' +
+              '<div class="flex items-center gap-1">' +
+                (prevStage ? '<button type="button" class="btn-stage-shift px-1.5 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 text-[9px] font-bold transition" data-dest="' + prevStage + '" title="Move to ' + prevStage + '">◀</button>' : '') +
+                (nextStage ? '<button type="button" class="btn-stage-shift px-1.5 py-0.5 rounded bg-[#1F1F1F] hover:bg-[#141414] text-white text-[9px] font-bold transition" data-dest="' + nextStage + '" title="Move to ' + nextStage + '">▶</button>' : '') +
+              '</div>' +
+            '</div>';
+
+          // Drag Events
+          card.addEventListener('dragstart', function(e) {
+            e.dataTransfer.setData('text/plain', task.id);
+            card.classList.add('task-card-dragging');
+          });
+          card.addEventListener('dragend', function() {
+            card.classList.remove('task-card-dragging');
+          });
+
+          // Edit & Delete handlers
+          var editBtn = card.querySelector('.btn-card-edit');
+          if (editBtn) {
+            editBtn.addEventListener('click', function(e) {
+              e.stopPropagation();
+              openTaskModal(task);
+            });
+          }
+
+          var delBtn = card.querySelector('.btn-card-delete');
+          if (delBtn) {
+            delBtn.addEventListener('click', function(e) {
+              e.stopPropagation();
+              tasks = tasks.filter(function(t) { return t.id !== task.id; });
+              renderAll();
+              showToast('Task removed');
+            });
+          }
+
+          // Quick stage move buttons
+          card.querySelectorAll('.btn-stage-shift').forEach(function(shiftBtn) {
+            shiftBtn.addEventListener('click', function(e) {
+              e.stopPropagation();
+              var destStage = shiftBtn.getAttribute('data-dest');
+              task.stage = destStage;
+              renderAll();
+              showToast('Moved to ' + destStage);
+            });
+          });
+
+          list.appendChild(card);
+        });
+      }
+    });
+
+    renderCalendarTasks();
+    updateCategoryStats();
+  }
+
+  // Render Calendar entries
+  function renderCalendarTasks() {
+    document.querySelectorAll('.calendar-day-col').forEach(function(col) {
+      var day = col.getAttribute('data-day');
+      var container = col.querySelector('.calendar-tasks');
+      if (!container) return;
+      container.innerHTML = '';
+      var dayTasks = tasks.filter(function(t) { return t.day === day; });
+
+      dayTasks.forEach(function(task) {
+        var meta = categoryColors[task.category] || categoryColors['Assignments'];
+        var badge = document.createElement('div');
+        badge.className = 'scheduled-task-badge p-2 rounded-lg bg-white border ' + meta.border + ' shadow-sm text-left flex flex-col gap-0.5 hover:shadow transition';
+        badge.innerHTML =
+          '<div class="flex items-center justify-between"><span class="text-[9px] font-bold ' + meta.tagText + '">' + task.slot + '</span><span class="text-[8px] text-slate-400 font-medium">' + task.hours + '</span></div>' +
+          '<div class="text-[10px] font-semibold text-slate-800 truncate">' + task.title + '</div>' +
+          '<div class="flex items-center justify-between text-[8px] text-slate-500 pt-0.5"><span>' + task.stage + '</span><span class="w-1.5 h-1.5 rounded-full ' + meta.dot + '"></span></div>';
+
+        badge.addEventListener('click', function(e) {
+          e.stopPropagation();
+          openTaskModal(task);
+        });
+        container.appendChild(badge);
+      });
+    });
+  }
+
+  // Update Category Top Cards Stats
+  function updateCategoryStats() {
+    var categories = ['Assignments', 'Team Projects', 'Personal Goal', 'Courses'];
+    categories.forEach(function(cat) {
+      var card = document.querySelector('section[aria-label="Team Overview Cards"] > div[data-cat="' + cat + '"]');
+      if (!card) return;
+      var catTasks = tasks.filter(function(t) { return t.category === cat; });
+      var totalHrs = 0;
+      catTasks.forEach(function(t) {
+        var parsed = parseFloat(t.hours);
+        if (!isNaN(parsed)) totalHrs += parsed;
+      });
+      var hrsEl = card.querySelector('.cat-hrs');
+      if (hrsEl) hrsEl.textContent = (totalHrs > 0 ? totalHrs.toFixed(1) + ' hrs' : '0 hrs');
+
+      var subEl = card.querySelector('.cat-sub');
+      if (subEl) {
+        if (catTasks.length === 0) subEl.textContent = '0 active tasks • No active timers';
+        else subEl.textContent = catTasks.length + ' active ' + (catTasks.length === 1 ? 'task' : 'tasks') + ' • Active';
+      }
+
+      var doneCount = catTasks.filter(function(t) { return t.stage === 'Done'; }).length;
+      var pct = catTasks.length === 0 ? 0 : Math.round((doneCount / catTasks.length) * 100);
+      var barEl = card.querySelector('.cat-progress-bar');
+      if (barEl) barEl.style.width = pct + '%';
+      var textEl = card.querySelector('.cat-progress-text');
+      if (textEl) textEl.textContent = pct + '%';
+    });
+  }
+
+  // Setup Drag and Drop on Kanban Columns
+  document.querySelectorAll('.kanban-col').forEach(function(col) {
+    var list = col.querySelector('.kanban-task-list');
+    var targetStage = col.getAttribute('data-stage');
+
+    col.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      col.classList.add('kanban-drop-hover');
+    });
+    col.addEventListener('dragleave', function() {
+      col.classList.remove('kanban-drop-hover');
+    });
+    col.addEventListener('drop', function(e) {
+      e.preventDefault();
+      col.classList.remove('kanban-drop-hover');
+      var taskId = e.dataTransfer.getData('text/plain');
+      var matched = tasks.find(function(t) { return t.id === taskId; });
+      if (matched && matched.stage !== targetStage) {
+        matched.stage = targetStage;
+        renderAll();
+        showToast('Moved "' + matched.title + '" to ' + targetStage);
+      }
+    });
+  });
+
+  // Modal Open Buttons
+  var topAddBtn = document.getElementById('btn-add-task');
+  if (topAddBtn) topAddBtn.addEventListener('click', function() { openTaskModal(); });
+
+  var closeBtn = document.getElementById('btn-close-modal');
+  if (closeBtn) closeBtn.addEventListener('click', closeTaskModal);
+
+  var cancelBtn = document.getElementById('btn-cancel-modal');
+  if (cancelBtn) cancelBtn.addEventListener('click', closeTaskModal);
+
+  if (modal) {
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) closeTaskModal();
+    });
+  }
+
+  // Header quick add buttons on columns
+  document.querySelectorAll('.btn-quick-add').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var stage = btn.getAttribute('data-stage') || 'Draft';
+      openTaskModal({ stage: stage });
+    });
+  });
+
+  // Empty drop-zone buttons on columns
+  document.querySelectorAll('.btn-open-kanban').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var stage = btn.getAttribute('data-stage') || 'Draft';
+      openTaskModal({ stage: stage });
+    });
+  });
+
+  // Calendar columns click to add
+  document.querySelectorAll('.calendar-day-col').forEach(function(col) {
+    col.addEventListener('click', function(e) {
+      if (e.target.closest('.scheduled-task-badge')) return;
+      var day = col.getAttribute('data-day') || 'Tuesday';
+      openTaskModal({ day: day });
+    });
+  });
+
+  // Form Submit (Create or Edit)
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var editId = taskIdInput.value;
+      var title = (titleInput.value || '').trim() || 'Untitled Task';
+      var category = categoryInput.value || 'Assignments';
+      var stage = stageInput.value || 'Draft';
+      var day = dayInput.value || 'Tuesday';
+      var slot = timeInput.value || '09:30';
+      var hours = (hoursInput.value || '').trim() || '1 hr';
+
+      if (editId) {
+        var existing = tasks.find(function(t) { return t.id === editId; });
+        if (existing) {
+          existing.title = title;
+          existing.category = category;
+          existing.stage = stage;
+          existing.day = day;
+          existing.slot = slot;
+          existing.hours = hours;
+          showToast('Updated "' + title + '"');
+        }
+      } else {
+        var newTask = {
+          id: 'task-' + Date.now(),
+          title: title,
+          category: category,
+          stage: stage,
+          day: day,
+          slot: slot,
+          hours: hours,
+          comments: 0,
+          attachments: 0
+        };
+        tasks.push(newTask);
+        showToast('Created "' + title + '" in ' + stage);
+      }
+
+      renderAll();
+      closeTaskModal();
+    });
+  }
+
+  // Column Options 3-dot dropdowns (Sort, Clear, Collapse)
+  document.querySelectorAll('.options-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var menu = btn.parentElement.querySelector('.kanban-dropdown-menu');
+      var isHidden = menu.classList.contains('hidden');
+      document.querySelectorAll('.kanban-dropdown-menu').forEach(function(m) { m.classList.add('hidden'); });
+      if (isHidden) menu.classList.remove('hidden');
+    });
+  });
+
+  document.querySelectorAll('.menu-action-sort').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var col = btn.closest('.kanban-col');
+      var stage = col.getAttribute('data-stage');
+      var colTasks = tasks.filter(function(t) { return t.stage === stage; });
+      colTasks.sort(function(a, b) { return a.title.localeCompare(b.title); });
+      tasks = tasks.filter(function(t) { return t.stage !== stage; }).concat(colTasks);
+      renderAll();
+      document.querySelectorAll('.kanban-dropdown-menu').forEach(function(m) { m.classList.add('hidden'); });
+      showToast('Sorted ' + stage + ' A-Z');
+    });
+  });
+
+  document.querySelectorAll('.menu-action-clear').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var col = btn.closest('.kanban-col');
+      var stage = col.getAttribute('data-stage');
+      tasks = tasks.filter(function(t) { return t.stage !== stage; });
+      renderAll();
+      document.querySelectorAll('.kanban-dropdown-menu').forEach(function(m) { m.classList.add('hidden'); });
+      showToast('Cleared all tasks from ' + stage);
+    });
+  });
+
+  document.querySelectorAll('.menu-action-collapse').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var col = btn.closest('.kanban-col');
+      var taskList = col.querySelector('.kanban-task-list');
+      var openBtn = col.querySelector('.btn-open-kanban');
+      var isCollapsed = taskList.classList.contains('hidden');
+      if (isCollapsed) {
+        taskList.classList.remove('hidden');
+        if (openBtn) openBtn.classList.remove('hidden');
+        btn.innerHTML = '<span>◱</span> Collapse';
+      } else {
+        taskList.classList.add('hidden');
+        if (openBtn) openBtn.classList.add('hidden');
+        btn.innerHTML = '<span>◲</span> Expand';
+      }
+      document.querySelectorAll('.kanban-dropdown-menu').forEach(function(m) { m.classList.add('hidden'); });
+    });
+  });
+
+  // Header Dropdowns (Settings, Help, Notifications)
+  var btnSettings = document.getElementById('btn-settings');
+  var menuSettings = document.getElementById('menu-settings');
+  var btnHelp = document.getElementById('btn-help');
+  var menuHelp = document.getElementById('menu-help');
+  var btnNotif = document.getElementById('btn-notifications');
+  var menuNotif = document.getElementById('menu-notifications');
+  var notifBadge = document.getElementById('notif-badge');
+
+  function closeAllMenus() {
+    if (menuSettings) menuSettings.classList.add('hidden');
+    if (menuHelp) menuHelp.classList.add('hidden');
+    if (menuNotif) menuNotif.classList.add('hidden');
+    document.querySelectorAll('.kanban-dropdown-menu').forEach(function(m) { m.classList.add('hidden'); });
+  }
+
+  if (btnSettings && menuSettings) {
+    btnSettings.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var wasHidden = menuSettings.classList.contains('hidden');
+      closeAllMenus();
+      if (wasHidden) menuSettings.classList.remove('hidden');
+    });
+  }
+
+  if (btnHelp && menuHelp) {
+    btnHelp.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var wasHidden = menuHelp.classList.contains('hidden');
+      closeAllMenus();
+      if (wasHidden) menuHelp.classList.remove('hidden');
+    });
+  }
+
+  if (btnNotif && menuNotif) {
+    btnNotif.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var wasHidden = menuNotif.classList.contains('hidden');
+      closeAllMenus();
+      if (wasHidden) {
+        menuNotif.classList.remove('hidden');
+        if (notifBadge) notifBadge.classList.add('hidden');
+      }
+    });
+  }
+
+  document.addEventListener('click', function() {
+    closeAllMenus();
+  });
+
+  // Calendar View Switcher
+  var viewButtons = document.querySelectorAll('.view-toggle-btn');
+  viewButtons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      viewButtons.forEach(function(b) {
+        b.classList.remove('bg-[#1F1F1F]', 'text-white', 'px-5', 'shadow-sm');
+        b.classList.add('text-slate-600', 'px-4');
+      });
+      btn.classList.add('bg-[#1F1F1F]', 'text-white', 'px-5', 'shadow-sm');
+      btn.classList.remove('text-slate-600', 'px-4');
+      showToast('Switched to ' + btn.getAttribute('data-view') + ' view');
+    });
+  });
+
+  var btnViewMore = document.getElementById('btn-view-more');
+  if (btnViewMore) {
+    btnViewMore.addEventListener('click', function() {
+      showToast('Timeline filters & export options opened');
+    });
+  }
+
+  // Expose global render and modal trigger for seamless launcher integration
+  window.renderTaskDashboard = renderAll;
+  window.openTaskModal = openTaskModal;
+  // Initial render
+  renderAll();
+})();
+</script>
+</body>
+</html>
