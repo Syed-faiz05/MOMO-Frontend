@@ -43,7 +43,13 @@
 <div class="w-full max-w-[1240px] bg-[#f8fafc]/90 rounded-3xl p-5 md:p-7 shadow-sm border border-slate-100 flex flex-col gap-6">
 <!-- BEGIN: TopHeader -->
 <header class="flex items-center justify-between">
-<h1 class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">Time Tracker</h1>
+<div class="flex items-center gap-3">
+  <a href="../index.html" class="flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-black py-1.5 px-3 rounded-full bg-white border border-slate-200/80 shadow-xs hover:bg-slate-50 transition" title="Back to Main App">
+    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"></path></svg>
+    <span>Home</span>
+  </a>
+  <h1 class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">Time Tracker</h1>
+</div>
 <!-- Top Action Icons -->
 <div class="flex items-center gap-2.5">
 <button class="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#1F1F1F] hover:bg-[#141414] text-white rounded-full font-medium text-xs shadow-sm transition" id="btn-add-task" type="button">
